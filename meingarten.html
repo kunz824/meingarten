@@ -256,7 +256,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <div class="pr"><div class="prl">📅 Intervall</div>
       <div class="step"><button onclick="chDI(-1)">−</button><span id="dIV">alle 14 Tage</span><button onclick="chDI(1)">+</button></div></div>
     <button class="sbtn" onclick="duengeEintr()">✅ Düngergabe eintragen</button>
-    <div class="dlog" id="dLog">📋 Letzte Gaben:<br>22.05.2026 · Alle Beete · Universaldünger<br>23.04.2026 · Beet 17 · Universaldünger<br>19.03.2026 · Beete 4–9 · Universaldünger</div>
+    <div class="dlog" id="dLog"></div>
   </div>
 
   <div class="pt">🐛 Pflanzenschutz</div>
@@ -502,6 +502,11 @@ const bib=[
 // ══ STATE ══════════════════════════════════════════════════
 let curYear=0, curMonth=new Date().getMonth()+1, libF='alle', tbF='alle';
 let pflegeN=["03.06.2026 – Alle Beete nach Trockenheit bewässert","20.05.2026 – Schneckenkörner bei Beet 11 ausgelegt"];
+let duengerLog=[
+  {d:"22.05.2026",beet:"Alle Beete",typ:"Universaldünger"},
+  {d:"23.04.2026",beet:"Beet 17",typ:"Universaldünger"},
+  {d:"19.03.2026",beet:"Beete 4–9",typ:"Universaldünger"}
+];
 let frI=1,daI=2,dII=1;
 const frO=["1× pro Woche","2× pro Woche","3× pro Woche","täglich"];
 const daO=["10 min","15 min","20 min","30 min","45 min","60 min"];
@@ -548,17 +553,53 @@ function mkBeet(b){
   </div>`;
 }
 function openBeet(b){
-  let d,nr;
-  if(fixBeete[b]){d=fixBeete[b];nr=d.nr;}
-  else{d=getBD(b,curYear);nr='Beet '+b;}
-  document.getElementById('mT').textContent=nr+(d.fix?' (Fixbeet)':'');
+  let d, nr, folgeText, naechstesJahr;
+  if(fixBeete[b]){
+    d=fixBeete[b]; nr=d.nr;
+    folgeText='Fixbeet (jedes Jahr gleich)';
+    naechstesJahr=d.k;
+  } else {
+    d=getBD(b,curYear); nr='Beet '+b;
+    const ffJetzt=getFF(b,curYear);
+    const ffNaechst=getFF(b,curYear+1);
+    folgeText='Folge '+ffJetzt+' – '+ffNames[ffJetzt];
+    naechstesJahr='Folge '+ffNaechst+' – '+ffNames[ffNaechst];
+  }
+  document.getElementById('mT').textContent=nr;
   document.getElementById('mS').textContent=d.k+' · '+(BASE+curYear);
+
+  // Pflege-Einträge die dieses Beet betreffen
+  const beetKey=String(b);
+  const beetMatch=(e)=>{
+    const bb=e.beet.replace('Beet ','');
+    return bb.includes(beetKey)||e.beet===nr||e.beet.includes('/'+beetKey)||e.beet.includes(beetKey+'/');
+  };
+  const pflegeRel=[...pflegeN].filter(n=>n.toLowerCase().includes(beetKey)||n.toLowerCase().includes(nr.toLowerCase()));
+  const tbRel=tbEntries.filter(beetMatch).sort((a,b)=>a.datum.split('.').reverse().join('')-b.datum.split('.').reverse().join(''));
+
+  let pflegeHTML='';
+  if(pflegeRel.length||tbRel.length){
+    pflegeHTML=`<div style="margin-top:14px;border-top:2px solid var(--border);padding-top:12px">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">🌿 Pflege & Journal</div>`;
+    tbRel.forEach(e=>{
+      pflegeHTML+=`<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between">
+        <span>${e.emoji} ${e.datum} – ${e.txt}</span>
+        <span style="color:#92400e;font-size:11px;margin-left:8px">${e.due||''}</span></div>`;
+    });
+    pflegeRel.forEach(n=>{
+      pflegeHTML+=`<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:var(--gd)">📝 ${n}</div>`;
+    });
+    pflegeHTML+='</div>';
+  }
+
   document.getElementById('mB').innerHTML=`
     <div class="ir"><span class="il">🌱 Vorkultur</span><span class="iv">${d.vor}</span></div>
-    <div class="ir"><span class="il">🌿 Hauptkultur / Pflanzzeit</span><span class="iv">${d.haupt}</span></div>
+    <div class="ir"><span class="il">🌿 Hauptkultur</span><span class="iv">${d.haupt}</span></div>
     <div class="ir"><span class="il">🍂 Folgekultur</span><span class="iv">${d.nach}</span></div>
     <div class="ir"><span class="il">✂️ Erntezeit</span><span class="iv">${d.ernte}</span></div>
-    <div class="ir"><span class="il">🔄 Folge</span><span class="iv">${d.folge||d.fix?'Fixbeet':''}</span></div>`;
+    <div class="ir"><span class="il">🔄 Aktuelle Folge</span><span class="iv">${folgeText}</span></div>
+    <div class="ir"><span class="il">⏭ Nächstes Jahr</span><span class="iv">${naechstesJahr}</span></div>
+    ${pflegeHTML}`;
   document.getElementById('bModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -574,17 +615,52 @@ function buildKal(){
   document.getElementById('mLabel').textContent=months[curMonth-1]+' 2026';
   const evs=kal[curMonth]||[];
   const el=document.getElementById('kalList');
-  if(!evs.length){el.innerHTML='<div class="empty">🌨 Keine Aktionen in diesem Monat</div>';return;}
-  el.innerHTML=evs.map(e=>`
-    <div class="ke ${e.t}">
-      <div class="ki">${e.i}</div>
-      <div class="kt">
-        <h4>${e.h}</h4>
-        <p>${e.d}</p>
-        <span class="btag">${e.b}</span>
-        ${e.due?`<span class="dtag">🌿 ${e.due}</span>`:''}
-      </div>
-    </div>`).join('');
+  const mo=String(curMonth).padStart(2,'0');
+
+  // Pflege-Einträge: Journal-Einträge + Pflegenotizen + Düngergaben dieses Monats
+  const tbMo=tbEntries.filter(e=>e.datum.startsWith(mo+'.') || e.datum.split('.')[1]===mo);
+  const pNMo=pflegeN.filter(n=>{const m=n.match(/\.(\d{2})\.2026/); return m&&m[1]===mo;});
+  const dMo=duengerLog.filter(e=>{const m=e.d.match(/\.(\d{2})\.2026/); return m&&m[1]===mo;});
+
+  let html='';
+  if(!evs.length && !tbMo.length && !pNMo.length && !dMo.length){
+    el.innerHTML='<div class="empty">🌨 Keine Aktionen in diesem Monat</div>';return;
+  }
+  if(evs.length){
+    html+=evs.map(e=>`
+      <div class="ke ${e.t}">
+        <div class="ki">${e.i}</div>
+        <div class="kt">
+          <h4>${e.h}</h4>
+          <p>${e.d}</p>
+          <span class="btag">${e.b}</span>
+          ${e.due?`<span class="dtag">🌿 ${e.due}</span>`:''}
+        </div>
+      </div>`).join('');
+  }
+  if(tbMo.length||pNMo.length||dMo.length){
+    html+=`<div style="margin-top:14px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🌿 Pflege & Journal</div>`;
+    tbMo.sort((a,b)=>a.datum.localeCompare(b.datum)).forEach(e=>{
+      html+=`<div class="ke pflege">
+        <div class="ki">${e.emoji}</div>
+        <div class="kt"><h4>${e.datum} – ${e.beet}</h4><p>${e.txt}</p>
+          ${e.due?`<span class="dtag">🌿 ${e.due}</span>`:''}
+        </div></div>`;
+    });
+    dMo.forEach(e=>{
+      html+=`<div class="ke duenger">
+        <div class="ki">🌿</div>
+        <div class="kt"><h4>${e.d} – Düngung</h4><p>${e.beet}</p>
+          <span class="dtag">${e.typ}</span>
+        </div></div>`;
+    });
+    pNMo.forEach(n=>{
+      html+=`<div class="ke pflege">
+        <div class="ki">📝</div>
+        <div class="kt"><h4>Pflegenotiz</h4><p>${n}</p></div></div>`;
+    });
+  }
+  el.innerHTML=html;
 }
 function chM(d){curMonth=((curMonth-1+d+12)%12)+1;buildKal();}
 
@@ -632,11 +708,23 @@ function renderFBars(){
 }
 function duengeEintr(){
   const typ=document.getElementById('dTyp').value, beet=document.getElementById('dBeet').value;
-  const now=new Date(), d=`${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
-  const log=document.getElementById('dLog');
-  log.innerHTML='📋 Letzte Gaben:<br>'+d+' · '+beet+' · '+typ+'<br>'+log.innerHTML.replace('📋 Letzte Gaben:<br>','');
+  const now=new Date(), d=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
+  duengerLog.unshift({d,beet,typ});
+  renderDLog();
   toast('✅ Düngergabe eingetragen: '+typ);
 }
+function renderDLog(){
+  const el=document.getElementById('dLog');
+  if(!el)return;
+  if(!duengerLog.length){el.innerHTML='📋 Keine Einträge';return;}
+  el.innerHTML='📋 Letzte Gaben:<br>'+duengerLog.map((e,i)=>
+    `<span style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+      <span>${e.d} · ${e.beet} · ${e.typ}</span>
+      <button onclick="delDLog(${i})" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:0 2px;line-height:1">×</button>
+    </span>`
+  ).join('');
+}
+function delDLog(i){duengerLog.splice(i,1);renderDLog();toast('\u{1F5D1} Eintrag gelöscht');}
 function addPN(){
   const inp=document.getElementById('pNInp');
   if(!inp.value.trim())return;
@@ -645,8 +733,15 @@ function addPN(){
   inp.value='';renderPN();toast('✅ Notiz gespeichert');
 }
 function renderPN(){
-  document.getElementById('pNList').innerHTML=pflegeN.map(n=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">${n}</div>`).join('');
+  document.getElementById('pNList').innerHTML=pflegeN.length
+    ? pflegeN.map((n,i)=>`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);gap:8px">
+        <span style="font-size:13px;flex:1">${n}</span>
+        <button onclick="delPN(${i})" style="flex-shrink:0;background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;padding:0 4px;line-height:1" title="Löschen">×</button>
+      </div>`).join('')
+    : '<div style="font-size:13px;color:var(--muted);padding:8px 0">Keine Notizen</div>';
 }
+function delPN(i){pflegeN.splice(i,1);renderPN();toast('\u{1F5D1} Notiz gelöscht');}
 
 // ══ FRUCHTFOLGE ════════════════════════════════════════════
 function buildFF(){
@@ -707,7 +802,7 @@ function togLib(el){const o=el.classList.contains('open');document.querySelector
 function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
 // ══ INIT ═══════════════════════════════════════════════════
-buildYrSel();buildGrid();buildKal();buildTbFilt();buildTb();buildFF();buildLibFilt();renderLib();renderPN();
+buildYrSel();buildGrid();buildKal();buildTbFilt();buildTb();buildFF();buildLibFilt();renderLib();renderPN();renderDLog();
 </script>
 </body>
 </html>
