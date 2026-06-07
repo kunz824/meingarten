@@ -755,7 +755,7 @@ function buildFF(){
   h+='</tr></thead><tbody>';
   [4,5,6,7,8,9,10,11,12,13].forEach(b=>{
     h+='<tr><td>Beet '+b+'</td>';
-    yrs.forEach((_,i)=>{const ff=ffData[b][i];h+='<td class="'+(ffCls[ff]||'")>'+ff+'</td>';});
+    yrs.forEach((_,i)=>{const ff=ffData[b][i];h+='<td class="'+(ffCls[ff]||'')+'">'+ff+'</td>';});
     h+='</tr>';
   });
   h+='</tbody>';
