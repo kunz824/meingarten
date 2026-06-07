@@ -582,11 +582,33 @@ function openBeet(b){
   document.getElementById('mS').textContent=d.k+' · '+(BASE+curYear);
 
   // Pflege-Einträge für dieses Beet
-  const bKey=bkStr;
-  const tbR=tbEntries.filter(e=>e.beet.includes(bKey)).sort((a,c)=>a.datum.split('.').reverse().join('')-c.datum.split('.').reverse().join(''));
-  const wR=wasserLog.filter(e=>e.beet.toLowerCase().includes(bKey)||e.beet==='Alle Beete');
-  const sR=schutzLog.filter(e=>e.beet.toLowerCase().includes(bKey)||e.beet==='Alle Beete');
-  const dR=duengerLog.filter(e=>e.beet.toLowerCase().includes(bKey)||e.beet==='Alle Beete');
+  // Präzises Beet-Matching:
+  // Eintrag mit "Alle Beete" → immer anzeigen
+  // Eintrag mit spezifischem Beet → nur wenn Beet-Nummer exakt übereinstimmt
+  // Bsp: bkStr="4" matcht "Beet 4", "Beet 4-7" aber NICHT "Beet 14" oder "Beet 40"
+  function beetMatch(beetStr){
+    if(!beetStr) return false;
+    const bs=beetStr.trim();
+    if(bs==='Alle Beete') return true;
+    // Normalisiere: "Beet 4", "Beet 4-7", "Beet 4/5", "4", "4-7", "1/2/3" etc.
+    const normalized=bs.replace(/Beet[e]?\s*/gi,'').trim();
+    // Split by / or - or , or Leerzeichen → einzelne Nummern/Ranges
+    const parts=normalized.split(/[/,\s]+/);
+    for(const part of parts){
+      // Range wie "4-7" → prüfe ob bkStr in diesem Range liegt
+      const range=part.match(/^(\d+)-(\d+)$/);
+      if(range){
+        const from=parseInt(range[1]),to=parseInt(range[2]);
+        const bNum=parseInt(bkStr);
+        if(!isNaN(bNum)&&bNum>=from&&bNum<=to) return true;
+      } else if(part.trim()===bkStr.trim()) return true;
+    }
+    return false;
+  }
+  const tbR=tbEntries.filter(e=>beetMatch(e.beet)).sort((a,c)=>a.datum.split('.').reverse().join('')-c.datum.split('.').reverse().join(''));
+  const wR=wasserLog.filter(e=>beetMatch(e.beet));
+  const sR=schutzLog.filter(e=>beetMatch(e.beet));
+  const dR=duengerLog.filter(e=>beetMatch(e.beet));
 
   let pflHTML='';
   if(tbR.length||wR.length||sR.length||dR.length){
