@@ -268,8 +268,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       </select></div>
     <div class="pr"><div class="prl">🔧 Methodik</div>
       <select id="pflMethode">
-        <option>Direktsaat</option><option>Jungpflanzen setzen</option><option>Stecken / Steckzwiebeln</option>
-        <option>Anzucht innen</option><option>Verpflanzen</option>
+        <option>Säen</option><option>Setzen / Stecken</option><option>Jungpflanzen setzen</option>
       </select></div>
     <!-- Vorschlagsbox – dynamisch befüllt -->
     <div id="pflVorschlag" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid var(--gl);border-radius:10px;padding:12px;font-size:13px;line-height:1.6">
@@ -772,18 +771,18 @@ function addEntry(){toast('📝 In der nativen iOS App mit Kamerazugriff verfüg
 // ══ PFLEGE ═══════════════════════════════════════════════
 // ══ PFLANZEN ═════════════════════════════════════════════
 const pflData = {
-  "Kartoffeln":      {saat:"Februar–April",methode:"Stecken / Steckzwiebeln",reihen:"2",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 4-7 (Kartoffeln)",due:"Universaldünger beim Stecken",hinweis:"Frühkartoffeln ab Juli erntbar."},
-  "Zwiebeln":        {saat:"April",methode:"Stecken / Steckzwiebeln",reihen:"2",abstand:"40 cm",inReihe:"8 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger beim Stecken",hinweis:"Vorkultur: Frühlingszwiebeln im Februar."},
-  "Karotten":        {saat:"April–Juni",methode:"Direktsaat",reihen:"2",abstand:"20 cm",inReihe:"4 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger bei Saat",hinweis:"Gestaffelt säen alle 3 Wochen."},
+  "Kartoffeln":      {saat:"Februar–April",methode:"Setzen / Stecken",reihen:"2",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 4-7 (Kartoffeln)",due:"Universaldünger beim Stecken",hinweis:"Frühkartoffeln ab Juli erntbar."},
+  "Zwiebeln":        {saat:"April",methode:"Setzen / Stecken",reihen:"2",abstand:"40 cm",inReihe:"8 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger beim Stecken",hinweis:"Vorkultur: Frühlingszwiebeln im Februar."},
+  "Karotten":        {saat:"April–Juni",methode:"Säen",reihen:"2",abstand:"20 cm",inReihe:"4 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger bei Saat",hinweis:"Gestaffelt säen alle 3 Wochen."},
   "Auberginen":      {saat:"Ende Mai (nach Frost)",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"0 cm",inReihe:"20 cm",beet:"Beet 10 (Auberginen/Bohnen)",due:"Universaldünger bei Pflanzung",hinweis:"Anzucht Feb–März innen bei 20°C. Warmer Standort."},
-  "Buschbohnen":     {saat:"Mitte Mai–Juni",methode:"Direktsaat",reihen:"2",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 10 (Auberginen/Bohnen)",due:"Kein Stickstoffdünger – Stickstoffsammler!",hinweis:"Nicht vor letztem Frost säen."},
+  "Buschbohnen":     {saat:"Mitte Mai–Juni",methode:"Säen",reihen:"2",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 10 (Auberginen/Bohnen)",due:"Kein Stickstoffdünger – Stickstoffsammler!",hinweis:"Nicht vor letztem Frost säen."},
   "Kohlrabi":        {saat:"April–Juni (gestaffelt)",methode:"Jungpflanzen setzen",reihen:"1",abstand:"30 cm",inReihe:"20 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Universaldünger bei Pflanzung",hinweis:"Alle 3 Wochen neu pflanzen. Vorkultur: Spinat."},
   "Blaukabis":       {saat:"April–Mai",methode:"Jungpflanzen setzen",reihen:"1",abstand:"50 cm",inReihe:"50 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Hornspäne vor Pflanzung",hinweis:"Anzucht Feb–März. Spätkohlsorte – frosthart."},
   "Lauch":           {saat:"April–Mai",methode:"Jungpflanzen setzen",reihen:"2",abstand:"0 cm",inReihe:"10 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Universaldünger bei Pflanzung",hinweis:"Anzucht Januar–Februar. Bleibt bis März im Beet."},
   "Fenchel":         {saat:"Mai–Juni (nicht früher!)",methode:"Jungpflanzen setzen",reihen:"1",abstand:"30 cm",inReihe:"20 cm",beet:"Beet 12 (Fenchel/Krautstiel)",due:"Hornspäne vor Pflanzung",hinweis:"Schiesst bei Kälte – erst ab Mai! Vorkultur: Radieschen."},
   "Krautstiel":      {saat:"April",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"–",inReihe:"–",beet:"Beet 12 (Fenchel/Krautstiel)",due:"Universaldünger bei Pflanzung",hinweis:"Äussere Blätter laufend schneiden. Vorkultur: Radieschen."},
-  "Schwarzwurzeln":  {saat:"April",methode:"Direktsaat",reihen:"3",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 13 (Schwarzwurzeln)",due:"Universaldünger bei Saat",hinweis:"Frisches Saatgut verwenden! Tiefwurzler."},
-  "Mais":            {saat:"Mitte Mai",methode:"Direktsaat",reihen:"3",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 1-3",due:"Universaldünger bei Saat",hinweis:"In Blöcken 3×3 säen – Windbestäubung!"},
+  "Schwarzwurzeln":  {saat:"April",methode:"Säen",reihen:"3",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 13 (Schwarzwurzeln)",due:"Universaldünger bei Saat",hinweis:"Frisches Saatgut verwenden! Tiefwurzler."},
+  "Mais":            {saat:"Mitte Mai",methode:"Säen",reihen:"3",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 1-3",due:"Universaldünger bei Saat",hinweis:"In Blöcken 3×3 säen – Windbestäubung!"},
   "Zucchetti":       {saat:"Mai (vorgez. ab April)",methode:"Jungpflanzen setzen",reihen:"2 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 1-3",due:"Kompost / Universaldünger",hinweis:"Nach letztem Frost pflanzen. Klein ernten."},
   "Kürbis":          {saat:"Mai (vorgez. ab April)",methode:"Jungpflanzen setzen",reihen:"2 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 1-3",due:"Kompost",hinweis:"Bodendecker. Ernte wenn Stiel verkorkt."},
   "Tomaten":         {saat:"Mai (nach Eisheiligen)",methode:"Jungpflanzen setzen",reihen:"6 Pflanzen",abstand:"–",inReihe:"–",beet:"Beet 14 (Tomaten)",due:"Universaldünger alle 2 Wochen ab Juni",hinweis:"Anzucht Feb–März. Beet 14 fix."},
@@ -791,15 +790,15 @@ const pflData = {
   "Paprika":         {saat:"Mai",methode:"Jungpflanzen setzen",reihen:"1 Pflanze",abstand:"–",inReihe:"–",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Universaldünger alle 2 Wochen",hinweis:"Wie Pepperoni – warmer Standort."},
   "Gurken":          {saat:"Mai",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Universaldünger alle 2 Wochen",hinweis:"Regelmässig giessen. Klein ernten."},
   "Kopfsalat":       {saat:"März–August (gestaffelt)",methode:"Jungpflanzen setzen",reihen:"3",abstand:"25 cm",inReihe:"25 cm",beet:"Beet 17 (Salat)",due:"Universaldünger bei Pflanzung, sparsam",hinweis:"Alle 3 Wochen neu pflanzen für laufende Ernte."},
-  "Feldsalat":       {saat:"August–September",methode:"Direktsaat",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beet 17 (Salat)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Wenig Pflege. Ernte Oktober–März."},
-  "Knoblauch":       {saat:"September–Oktober",methode:"Stecken / Steckzwiebeln",reihen:"6",abstand:"15 cm",inReihe:"25 cm",beet:"Beete 1-3",due:"Hornspäne beim Stecken",hinweis:"5 cm tief stecken. Überwintert. Ernte Mai–Juni."},
+  "Feldsalat":       {saat:"August–September",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beet 17 (Salat)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Wenig Pflege. Ernte Oktober–März."},
+  "Knoblauch":       {saat:"September–Oktober",methode:"Setzen / Stecken",reihen:"6",abstand:"15 cm",inReihe:"25 cm",beet:"Beete 1-3",due:"Hornspäne beim Stecken",hinweis:"5 cm tief stecken. Überwintert. Ernte Mai–Juni."},
   "Winterlauch":     {saat:"Oktober",methode:"Jungpflanzen setzen",reihen:"2",abstand:"0 cm",inReihe:"10 cm",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Kaum Düngung nötig",hinweis:"Nach Pepperoni/Gurken-Ernte pflanzen. Frosthart."},
-  "Spinat":          {saat:"Feb–März / Aug–Sept",methode:"Direktsaat",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 6/7/11 (Vorkultur)",due:"Kaum Düngung",hinweis:"Frosthart –8°C. Schnellste Vorkultur."},
-  "Nüssler":         {saat:"August–September",methode:"Direktsaat",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 4-7 (nach Kartoffeln)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Nach Kartoffelernte direkt säen."},
+  "Spinat":          {saat:"Feb–März / Aug–Sept",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 6/7/11 (Vorkultur)",due:"Kaum Düngung",hinweis:"Frosthart –8°C. Schnellste Vorkultur."},
+  "Nüssler":         {saat:"August–September",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 4-7 (nach Kartoffeln)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Nach Kartoffelernte direkt säen."},
   "Endivien":        {saat:"August (Pflanzung)",methode:"Jungpflanzen setzen",reihen:"2",abstand:"30 cm",inReihe:"25 cm",beet:"Beete 4-7 (nach Kartoffeln)",due:"Kaum Düngung",hinweis:"Nach Frühkartoffeln. Vor Frost einbringen."},
   "Zuckerhut":       {saat:"September (Pflanzung)",methode:"Jungpflanzen setzen",reihen:"2",abstand:"30 cm",inReihe:"25 cm",beet:"Beet 12 (nach Fenchel)",due:"Kaum Düngung",hinweis:"Frosthart bis –5°C. Ernte bis Dezember."},
-  "Frühlingszwiebeln":{saat:"März–April",methode:"Direktsaat",reihen:"–",abstand:"–",inReihe:"–",beet:"Beete 8-9 (Vorkultur)",due:"–",hinweis:"8–10 Wochen Standzeit. Vor Zwiebeln/Karotten."},
-  "Radieschen":      {saat:"März–August",methode:"Direktsaat",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 12/13 (Vorkultur)",due:"–",hinweis:"4–6 Wochen bis Ernte. Vor Fenchel/Krautstiel."},
+  "Frühlingszwiebeln":{saat:"März–April",methode:"Säen",reihen:"–",abstand:"–",inReihe:"–",beet:"Beete 8-9 (Vorkultur)",due:"–",hinweis:"8–10 Wochen Standzeit. Vor Zwiebeln/Karotten."},
+  "Radieschen":      {saat:"März–August",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 12/13 (Vorkultur)",due:"–",hinweis:"4–6 Wochen bis Ernte. Vor Fenchel/Krautstiel."},
 };
 
 let pflLog = [];
