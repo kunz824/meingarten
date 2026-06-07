@@ -153,6 +153,12 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .ni:focus{border-color:var(--gm)}
 .sbtn{margin-top:8px;padding:10px 20px;background:var(--gd);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--card);color:var(--text)}
+/* KALENDER CHECKBOX */
+.ke-wrap{position:relative}
+.ke-check{position:absolute;top:12px;right:12px;width:20px;height:20px;cursor:pointer;accent-color:var(--gm);flex-shrink:0}
+.ke.done{opacity:.45;background:#f5f5f5 !important;border-left-color:#d1d5db !important}
+.ke.done h4{text-decoration:line-through;color:var(--muted)}
+.kal-section-done{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#bbb;margin:18px 0 7px;border-top:1px dashed #e0e0e0;padding-top:14px}
 /* TOAST */
 .toast{position:fixed;top:calc(env(safe-area-inset-top,44px) + 70px);left:50%;transform:translateX(-50%) translateY(-10px);background:var(--gd);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -320,7 +326,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   </div>
 
   <!-- 4. BEWÄSSERUNGS-JOURNAL -->
-  <div class="pt">💦 Bewässerungs-Journal</div>
+  <div class="pt">💦 Bewässerung</div>
   <div class="pc">
     <div class="pr"><div class="prl">📍 Beet</div>
       <select id="wasserBeet">
@@ -338,14 +344,17 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <div class="dlog" id="wasserLogEl"></div>
   </div>
 
-  <!-- 5. AUTOMATISIERUNG -->
-  <div class="pt">⚙️ Automatisierung</div>
+</div>
+
+<!-- TAB AUTOMATISIERUNG -->
+<div class="screen" id="screen-auto">
+  <div class="pt">⚙️ Bewässerung Automatik</div>
   <div class="pc">
-    <div class="pr"><div class="prl">🔄 Bewässerung Automatik</div>
+    <div class="pr"><div class="prl">🔄 Automatik ein/aus</div>
       <label class="ts"><input type="checkbox" id="autoT" onchange="togAuto()"><span class="tsl"></span></label></div>
     <div class="pr"><div class="prl">📅 Frequenz</div>
       <div class="step"><button onclick="chFr(-1)">−</button><span id="frV">2x pro Woche</span><button onclick="chFr(1)">+</button></div></div>
-    <div class="pr"><div class="prl">⏱ Bewässerungsdauer</div>
+    <div class="pr"><div class="prl">⏱ Dauer</div>
       <div class="step"><button onclick="chDa(-1)">−</button><span id="daV">20 min</span><button onclick="chDa(1)">+</button></div></div>
     <div class="pr"><div class="prl">🕗 Nächste Bewässerung</div><div class="prv" id="naxt">Morgen 07:00</div></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:8px">
@@ -354,6 +363,31 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     </div>
   </div>
 
+  <div class="pt">🌡 Sensoren & Status</div>
+  <div class="pc">
+    <div class="pr"><div class="prl">🌧 Regensensor</div>
+      <label class="ts"><input type="checkbox" id="regenT" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">☀️ Sonnenschutz</div>
+      <label class="ts"><input type="checkbox" id="sonnT"><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">📡 Verbindung</div>
+      <div class="prv" style="display:flex;align-items:center;gap:6px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 4px #22c55e"></div>
+        <span>Verbunden</span></div></div>
+    <div class="pr"><div class="prl">🔋 Akku Sensor</div>
+      <div class="prv">78%</div></div>
+  </div>
+
+  <div class="pt">🔔 Benachrichtigungen</div>
+  <div class="pc">
+    <div class="pr"><div class="prl">💧 Bewässerung gestartet</div>
+      <label class="ts"><input type="checkbox" id="notifW" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">🌧 Regen erkannt</div>
+      <label class="ts"><input type="checkbox" id="notifR" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">⚠️ Sensor-Fehler</div>
+      <label class="ts"><input type="checkbox" id="notifE" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">📅 Wochenzusammenfassung</div>
+      <label class="ts"><input type="checkbox" id="notifS" checked><span class="tsl"></span></label></div>
+  </div>
 </div>
 
 <!-- TAB FRUCHTFOLGE -->
@@ -381,6 +415,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <div class="tab" onclick="showTab('pflege',this)"><div class="tab-icon">💧</div><div class="tab-label">Pflege</div></div>
   <div class="tab" onclick="showTab('fruchtfolge',this)"><div class="tab-icon">🔄</div><div class="tab-label">Fruchtfolge</div></div>
   <div class="tab" onclick="showTab('bibliothek',this)"><div class="tab-icon">📚</div><div class="tab-label">Bibliothek</div></div>
+  <div class="tab" onclick="showTab('auto',this)"><div class="tab-icon">⚙️</div><div class="tab-label">Automatik</div></div>
 </div>
 
 <div class="mo" id="bModal" onclick="closeMo(event)">
@@ -573,6 +608,9 @@ let duengerLog=[];
 let schutzLog=[];
 let wasserLog=[];
 
+// newPflLog: manuell im Pflege-Tab erfasste Pflanzungen (für Pflege-Anzeige)
+let newPflLog = [];
+
 // Historische Pflanz- und Saat-Einträge aus Journal.xlsx
 // Methodik: gesät → Säen | gesetzt/gepflanzt → Setzen/Stecken bzw. Jungpflanzen setzen
 let pflLog=[
@@ -606,6 +644,7 @@ const dIO=["alle 7 Tage","alle 14 Tage","alle 21 Tage","monatlich"];
 const wLO=["2 Liter","5 Liter","10 Liter","15 Liter","20 Liter","30 Liter","50 Liter"];
 const wMO=["5 min","10 min","15 min","20 min","30 min","45 min","60 min"];
 let curYear=0,curMonth=new Date().getMonth()+1,libF='alle',tbF='alle';
+let kalRead={}; // {monat_gruppeIdx: true} für gelesene Einträge
 const months=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
 const bib=[
@@ -643,11 +682,12 @@ function showTab(tab,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
   el.classList.add('active');
-  const subs={beete:'Gemüsegarten Marianne und Martin',kalender:'Anbaukalender 2026',tagebuch:'Journal – Alle Massnahmen',pflege:'Bewässerung & Pflege',fruchtfolge:'10-Jahres-Rotation',bibliothek:'Kultursteckbriefe'};
+  const subs={beete:'Gemüsegarten Marianne und Martin',kalender:'Anbaukalender 2026',tagebuch:'Journal – Alle Massnahmen',pflege:'Bewässerung & Pflege',fruchtfolge:'10-Jahres-Rotation',bibliothek:'Kultursteckbriefe',auto:'Bewässerungssteuerung'};
   document.getElementById('hsub').textContent=subs[tab]||'';
   document.getElementById('fabBtn').style.display=tab==='tagebuch'?'flex':'none';
   if(tab==='pflege')renderFBars();
   if(tab==='tagebuch'){buildJKat();buildJBeet();renderJournal();}
+  if(tab==='auto'){renderFBars();}
 }
 
 // ══ BEETE ════════════════════════════════════════════════
@@ -768,37 +808,71 @@ function closeMo(e){
 }
 
 // ══ KALENDER ═════════════════════════════════════════════
+function kalKey(mo,idx){return mo+'_'+idx;}
+function togKalRead(idx){
+  const k=kalKey(curMonth,idx);
+  kalRead[k]=!kalRead[k];
+  buildKal();
+}
+
 function buildKal(){
   document.getElementById('mLabel').textContent=months[curMonth-1]+' 2026';
   const evs=kal[curMonth]||[];
   const el=document.getElementById('kalList');
   if(!evs.length){el.innerHTML='<div class="empty">🌨 Keine Empfehlungen in diesem Monat</div>';return;}
 
-  // Gruppiere nach Kategorie
   const groups=[
-    {key:'pflanzen',  label:'🌱 Pflanzen & Säen',    cls:'pflanzen'},
-    {key:'ernte',     label:'✂️ Ernten',             cls:'ernte'},
-    {key:'duenger',   label:'🌿 Düngung',            cls:'duenger'},
-    {key:'schutz',    label:'🐛 Pflanzenschutz',     cls:'schutz'},
-    {key:'bewaessern',label:'💧 Bewässerung',        cls:'bewaessern'},
-    {key:'pflege',    label:'🛠 Pflege',             cls:'pflege'},
+    {key:'pflanzen',  label:'🌱 Pflanzen & Säen'},
+    {key:'ernte',     label:'✂️ Ernten'},
+    {key:'duenger',   label:'🌿 Düngung'},
+    {key:'schutz',    label:'🐛 Pflanzenschutz'},
+    {key:'bewaessern',label:'💧 Bewässerung'},
+    {key:'pflege',    label:'🛠 Pflege'},
   ];
 
-  let html='';
+  // Globalen Index pro Eintrag vergeben (für Checkbox-Key)
+  let globalIdx=0;
+  const pending=[], done=[];
   groups.forEach(g=>{
-    const items=evs.filter(e=>e.t===g.key||e.kat===g.label.replace(/^[^ ]+ /,''));
+    const items=evs.filter(e=>e.t===g.key);
     if(!items.length) return;
-    html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:14px 0 7px">'+g.label+'</div>';
+    const pendItems=[], doneItems=[];
     items.forEach(e=>{
-      html+='<div class="ke '+e.t+'">'
-        +'<div class="ki">'+e.i+'</div>'
-        +'<div class="kt">'
-        +'<h4>'+e.h+'</h4>'
-        +'<p>'+e.d+'</p>'
-        +'<span class="btag">'+e.b+'</span>'
-        +'</div></div>';
+      const idx=globalIdx++;
+      const isRead=!!kalRead[kalKey(curMonth,idx)];
+      const entry={e,idx,isRead};
+      if(isRead) doneItems.push(entry); else pendItems.push(entry);
     });
+    if(pendItems.length) pending.push({g,items:pendItems});
+    if(doneItems.length) done.push({g,items:doneItems});
   });
+
+  function renderEntry(e,idx,isDone){
+    return '<div class="ke '+e.t+(isDone?' done':'')+'" style="padding-right:40px;position:relative">'
+      +'<div class="ki">'+e.i+'</div>'
+      +'<div class="kt">'
+      +'<h4>'+e.h+'</h4>'
+      +'<p>'+e.d+'</p>'
+      +'<span class="btag">'+e.b+'</span>'
+      +'</div>'
+      +'<input type="checkbox" class="ke-check" '+(isDone?'checked':'')
+      +' onchange="togKalRead('+idx+')" title="'+(isDone?'Als offen markieren':'Als erledigt markieren')+'">'
+      +'</div>';
+  }
+
+  let html='';
+  // Offene Einträge
+  pending.forEach(({g,items})=>{
+    html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:14px 0 7px">'+g.label+'</div>';
+    items.forEach(({e,idx})=>{ html+=renderEntry(e,idx,false); });
+  });
+  // Erledigte unten
+  if(done.length){
+    html+='<div class="kal-section-done">✅ Erledigt</div>';
+    done.forEach(({g,items})=>{
+      items.forEach(({e,idx})=>{ html+=renderEntry(e,idx,true); });
+    });
+  }
 
   el.innerHTML=html;
 }
@@ -918,24 +992,33 @@ function pflanzEintr() {
   if (!k) { toast('⚠️ Bitte Kultur wählen'); return; }
   const beet = document.getElementById('pflBeet').value;
   const methode = document.getElementById('pflMethode').value;
-  pflLog.unshift({d:nowStr(), k, beet, methode});
-  // Auch ins Tagebuch
-  tbEntries.unshift({id: Date.now(), datum: nowStr(), beet, kat:'Pflanzung', txt: k + ' – ' + methode, due: pflData[k]?pflData[k].due:'', emoji:'🌱', katC:'th'});
+  const entry = {d:nowStr(), k, beet, methode, due: pflData[k]?pflData[k].due:''};
+  pflLog.unshift(entry);
+  newPflLog.unshift(entry);
   renderPflLog();
-  buildTb();
   renderJournal();
   toast('✅ Pflanzung eingetragen: ' + k);
 }
 
 function renderPflLog() {
   const el = document.getElementById('pflLogEl'); if (!el) return;
-  el.innerHTML = pflLog.length
-    ? '📋 Letzte Pflanzungen:' + pflLog.map((e,i) =>
+  // Nur manuell erfasste Einträge (newPflLog), max. 3
+  const show = newPflLog.slice(0, 3);
+  el.innerHTML = show.length
+    ? '📋 Letzte Pflanzungen:' + show.map((e,i) =>
         logRow('<b>'+e.d+'</b> · '+e.k+' · '+e.beet+' · '+e.methode, 'delPfl', i)
       ).join('')
+      + (newPflLog.length > 3 ? '<div style="font-size:11px;color:var(--muted);padding:4px 0">Ältere Einträge im Journal</div>' : '')
     : '📋 Keine Einträge';
 }
-function delPfl(i) { pflLog.splice(i,1); renderPflLog(); renderJournal(); toast('🗑 Gelöscht'); }
+function delPfl(i) {
+  const e = newPflLog[i];
+  newPflLog.splice(i, 1);
+  // Auch aus pflLog entfernen
+  const pi = pflLog.findIndex(p => p.d===e.d && p.k===e.k && p.beet===e.beet);
+  if(pi > -1) pflLog.splice(pi, 1);
+  renderPflLog(); renderJournal(); toast('🗑 Gelöscht');
+}
 
 function togAuto(){const on=document.getElementById('autoT').checked;document.getElementById('naxt').textContent=on?'Morgen 07:00':'Manuell';toast(on?'💧 Automatik ein':'🔴 Automatik aus');}
 function chFr(d){frI=Math.max(0,Math.min(frO.length-1,frI+d));document.getElementById('frV').textContent=frO[frI];}
@@ -965,8 +1048,10 @@ function duengeEintr(){
 function delDLog(i){duengerLog.splice(i,1);renderDLog();renderJournal();toast('🗑 Gelöscht');}
 function renderDLog(){
   const el=document.getElementById('dLogEl');if(!el)return;
-  el.innerHTML=duengerLog.length
-    ?'📋 Letzte Gaben:'+duengerLog.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.typ,'delDLog',i)).join('')
+  const show=duengerLog.slice(0,3);
+  el.innerHTML=show.length
+    ?'📋 Letzte Gaben:'+show.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.typ,'delDLog',i)).join('')
+      +(duengerLog.length>3?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Ältere Einträge im Journal</div>':'')
     :'📋 Keine Einträge';
 }
 
@@ -982,8 +1067,10 @@ function schutzEintr(){
 function delSchutz(i){schutzLog.splice(i,1);renderSchutzLog();renderJournal();toast('🗑 Gelöscht');}
 function renderSchutzLog(){
   const el=document.getElementById('schutzLogEl');if(!el)return;
-  el.innerHTML=schutzLog.length
-    ?'📋 Letzte Massnahmen:'+schutzLog.map((e,i)=>logRow('<b>'+e.d+'</b> · '+e.typ+' · '+e.beet+'<br><span style="font-size:11px;opacity:.8">'+e.notiz+'</span>','delSchutz',i)).join('')
+  const show=schutzLog.slice(0,3);
+  el.innerHTML=show.length
+    ?'📋 Letzte Massnahmen:'+show.map((e,i)=>logRow('<b>'+e.d+'</b> · '+e.typ+' · '+e.beet+'<br><span style="font-size:11px;opacity:.8">'+e.notiz+'</span>','delSchutz',i)).join('')
+      +(schutzLog.length>3?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Ältere Einträge im Journal</div>':'')
     :'📋 Keine Einträge';
 }
 
@@ -996,8 +1083,10 @@ function wasserEintr(){
 function delWasser(i){wasserLog.splice(i,1);renderWasserLog();renderJournal();toast('🗑 Gelöscht');}
 function renderWasserLog(){
   const el=document.getElementById('wasserLogEl');if(!el)return;
-  el.innerHTML=wasserLog.length
-    ?'📋 Letzte Bewässerungen:'+wasserLog.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.menge+' / '+e.dauer,'delWasser',i)).join('')
+  const show=wasserLog.slice(0,3);
+  el.innerHTML=show.length
+    ?'📋 Letzte Bewässerungen:'+show.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.menge+' / '+e.dauer,'delWasser',i)).join('')
+      +(wasserLog.length>3?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Ältere Einträge im Journal</div>':'')
     :'📋 Keine Einträge';
 }
 
