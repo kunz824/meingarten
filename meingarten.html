@@ -1292,8 +1292,79 @@ function renderJournal(){
 // ══ TOAST ════════════════════════════════════════════════
 function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
+// ══ STORAGE – localStorage Persistenz ════════════════════
+// Schlüssel für alle persistenten Daten
+const STORE_KEYS={
+  pflLog:    'tf_pflLog',
+  newPflLog: 'tf_newPflLog',
+  duenger:   'tf_duengerLog',
+  schutz:    'tf_schutzLog',
+  wasser:    'tf_wasserLog',
+  tbEntries: 'tf_tbEntries',
+  kalRead:   'tf_kalRead',
+};
+
+function storeSave(key, data){
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch(e){ console.warn('Storage save failed', e); }
+}
+
+function storeLoad(key, fallback){
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch(e){ return fallback; }
+}
+
+function saveAll(){
+  storeSave(STORE_KEYS.pflLog,    pflLog);
+  storeSave(STORE_KEYS.newPflLog, newPflLog);
+  storeSave(STORE_KEYS.duenger,   duengerLog);
+  storeSave(STORE_KEYS.schutz,    schutzLog);
+  storeSave(STORE_KEYS.wasser,    wasserLog);
+  storeSave(STORE_KEYS.tbEntries, tbEntries);
+  storeSave(STORE_KEYS.kalRead,   kalRead);
+}
+
+function loadAll(){
+  // pflLog: localStorage überschreibt historische Daten wenn vorhanden
+  const savedPfl = storeLoad(STORE_KEYS.pflLog, null);
+  if(savedPfl !== null) pflLog = savedPfl;
+  // else: pflLog behält historische Einträge aus dem Code
+
+  newPflLog  = storeLoad(STORE_KEYS.newPflLog, []);
+  duengerLog = storeLoad(STORE_KEYS.duenger,   []);
+  schutzLog  = storeLoad(STORE_KEYS.schutz,    []);
+  wasserLog  = storeLoad(STORE_KEYS.wasser,    []);
+  tbEntries  = storeLoad(STORE_KEYS.tbEntries, []);
+  kalRead    = storeLoad(STORE_KEYS.kalRead,   {});
+}
+
+// Automatisch speichern nach jeder Aktion – hook in alle Eintrag-Funktionen
+const _origPflanzEintr   = pflanzEintr;
+const _origDuengeEintr   = duengeEintr;
+const _origSchutzEintr   = schutzEintr;
+const _origWasserEintr   = wasserEintr;
+const _origDelPfl        = delPfl;
+const _origDelDLog       = delDLog;
+const _origDelSchutz     = delSchutz;
+const _origDelWasser     = delWasser;
+const _origTogKalRead    = togKalRead;
+
+pflanzEintr  = function(){ _origPflanzEintr();  saveAll(); };
+duengeEintr  = function(){ _origDuengeEintr();  saveAll(); };
+schutzEintr  = function(){ _origSchutzEintr();  saveAll(); };
+wasserEintr  = function(){ _origWasserEintr();  saveAll(); };
+delPfl       = function(i){ _origDelPfl(i);     saveAll(); };
+delDLog      = function(i){ _origDelDLog(i);    saveAll(); };
+delSchutz    = function(i){ _origDelSchutz(i);  saveAll(); };
+delWasser    = function(i){ _origDelWasser(i);  saveAll(); };
+togKalRead   = function(i){ _origTogKalRead(i); saveAll(); };
+
 // ══ INIT ═════════════════════════════════════════════════
-buildYrSel();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();buildJKat();buildJBeet();renderJournal();
+loadAll();
+buildYrSel();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
+renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
+buildJKat();buildJBeet();renderJournal();
 </script>
 </body>
 </html>
