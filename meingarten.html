@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MeinGarten">
+<title>MeinGarten – Feldkalender</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-dark: #1a4a28;
+  --green-mid:  #2d7a45;
+  --green-light:#4caf70;
+  --green-pale: #e8f5ed;
+  --green-muted:#c8e6d0;
+  --soil:       #6b4423;
+  --soil-light: #c4956a;
+  --amber:      #f59e0b;
+  --amber-pale: #fef3c7;
+  --blue-pale:  #dbeafe;
+  --blue:       #3b82f6;
+  --purple-pale:#f3e8ff;
+  --purple:     #9333ea;
+  --teal-pale:  #ccfbf1;
+  --teal:       #0d9488;
+  --orange-pale:#ffedd5;
+  --orange:     #ea580c;
+  --red-pale:   #fee2e2;
+  --red:        #dc2626;
+  --bg:         #f7f5f0;
+  --card:       #ffffff;
+  --text:       #1c1917;
+  --text-muted: #78716c;
+  --border:     #e7e5e0;
+  --tab-h:      68px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ── STATUS BAR SPACER ── */
+.status-bar { height: env(safe-area-inset-top, 44px); background: var(--green-dark); }
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--green-dark);
+  padding: 12px 20px 16px;
+  color: white;
+  flex-shrink: 0;
+}
+.app-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  letter-spacing: -0.3px;
+}
+.app-header p { font-size: 12px; opacity: 0.65; margin-top: 1px; }
+
+/* ── SCROLL AREA ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--tab-h) + var(--safe-bottom) + 8px);
+}
+
+/* ── TAB BAR ── */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  height: calc(var(--tab-h) + var(--safe-bottom));
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+  z-index: 100;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  user-select: none;
+}
+.tab-icon { font-size: 22px; line-height: 1; transition: transform 0.2s; }
+.tab-label { font-size: 9.5px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.2px; }
+.tab.active .tab-label { color: var(--green-mid); font-weight: 600; }
+.tab.active .tab-icon { transform: scale(1.12); }
+
+/* ── SECTION ── */
+.screen { display: none; padding: 16px; }
+.screen.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin: 18px 0 8px;
+}
+
+/* ── PILL BADGE ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════
+   TAB 1 – BEETE
+══════════════════════════════════ */
+.year-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.year-selector::-webkit-scrollbar { display: none; }
+.year-btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.year-btn.active {
+  background: var(--green-dark);
+  color: white;
+  border-color: var(--green-dark);
+}
+
+/* Garden layout */
+.garden-layout {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.garden-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--green-dark);
+  margin-bottom: 14px;
+}
+
+/* Special beds row */
+.special-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.beet-special {
+  flex: 1;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+/* Kompost */
+.kompost-box {
+  background: #f0e6d3;
+  border-color: #c4956a;
+  text-align: center;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--soil);
+  margin-bottom: 8px;
+}
+
+/* Beet grid */
+.beet-grid { display: flex; flex-direction: column; gap: 7px; }
+.beet-row { display: flex; gap: 7px; }
+.beet {
+  flex: 1;
+  border-radius: 10px;
+  padding: 9px 10px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.18s;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.beet:active { transform: scale(0.96); }
+.beet-nr {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.6;
+  letter-spacing: 0.5px;
+}
+.beet-kultur {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 3px;
+}
+.beet-folge {
+  font-size: 9px;
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+/* Beet colors by Folge */
+.folge-I    { background: #fff8ed; border-color: #f59e0b; }
+.folge-II   { background: var(--orange-pale); border-color: #fb923c; }
+.folge-III  { background: var(--amber-pale); border-color: #fbbf24; }
+.folge-IV   { background: var(--blue-pale); border-color: #60a5fa; }
+.folge-V    { background: var(--green-pale); border-color: var(--green-light); }
+.folge-VI   { background: var(--teal-pale); border-color: #2dd4bf; }
+.folge-VII  { background: var(--purple-pale); border-color: #c084fc; }
+.folge-VIII { background: #fee2e2; border-color: #f87171; }
+.folge-IX   { background: #f0fdf4; border-color: #86efac; }
+
+/* Beet detail modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 430px;
+  padding: 20px 20px calc(24px + var(--safe-bottom));
+  max-height: 80dvh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.modal-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text-muted); font-weight: 500; }
+.info-val { font-weight: 600; text-align: right; max-width: 55%; }
+.close-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 14px;
+  background: var(--green-dark);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════
+   TAB 2 – KALENDER
+══════════════════════════════════ */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.month-nav button {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.month-label {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--green-dark);
+}
+.kal-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: 14px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--green-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.kal-event.saen    { border-left-color: #22c55e; }
+.kal-event.pflanzen{ border-left-color: #3b82f6; }
+.kal-event.ernte   { border-left-color: #f59e0b; }
+.kal-event.pflege  { border-left-color: #ec4899; }
+.kal-event.stecken { border-left-color: #8b5cf6; }
+.kal-icon { font-size: 22px; flex-shrink: 0; }
+.kal-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.kal-text p  { font-size: 12px; color: var(--text-muted); }
+.kal-text .beet-tag {
+  display: inline-block;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.empty-month {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* ══════════════════════════════════
+   TAB 3 – TAGEBUCH
+══════════════════════════════════ */
+.tagebuch-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+  scrollbar-width: none;
+}
+.tagebuch-filter::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+}
+.filter-btn.active {
+  background: var(--green-dark);
+  color: white;
+  border-color: var(--green-dark);
+}
+.tagebuch-entry {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.entry-meta { font-size: 11px; color: var(--text-muted); }
+.entry-cat {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.entry-text { font-size: 14px; line-height: 1.5; }
+.entry-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 10px;
+  background: var(--green-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-mid);
+  font-size: 40px;
+}
+.add-entry-btn {
+  position: fixed;
+  bottom: calc(var(--tab-h) + var(--safe-bottom) + 16px);
+  right: 16px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--green-dark);
+  color: white;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+/* ══════════════════════════════════
+   TAB 4 – FRUCHTFOLGE
+══════════════════════════════════ */
+.ff-scroll-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.ff-table-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  -webkit-overflow-scrolling: touch;
+}
+.ff-table {
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 12px;
+  background: white;
+  min-width: 700px;
+}
+.ff-table th {
+  background: var(--green-dark);
+  color: white;
+  padding: 9px 14px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 11px;
+}
+.ff-table th:first-child { text-align: left; border-radius: 14px 0 0 0; }
+.ff-table th:last-child { border-radius: 0 14px 0 0; }
+.ff-table td {
+  padding: 8px 12px;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 12px;
+}
+.ff-table td:first-child { text-align: left; font-weight: 700; color: var(--green-dark); padding-left: 14px; }
+.ff-table tr:last-child td:first-child { border-radius: 0 0 0 14px; }
+.ff-table tr:last-child td:last-child  { border-radius: 0 0 14px 0; }
+.ff-II  { background: #ffedd5; color: #c2410c; }
+.ff-III { background: #fef9c3; color: #a16207; }
+.ff-IV  { background: #dbeafe; color: #1e40af; }
+.ff-V   { background: #dcfce7; color: #15803d; }
+.ff-VI  { background: #ccfbf1; color: #0f766e; }
+.ff-VII { background: #f3e8ff; color: #7c3aed; }
+
+.ff-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.ff-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.ff-leg-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Current year highlight */
+.ff-table td.current-year { outline: 2px solid var(--green-mid); outline-offset: -2px; }
+
+/* ══════════════════════════════════
+   TAB 5 – BIBLIOTHEK
+══════════════════════════════════ */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.search-bar input {
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: transparent;
+  flex: 1;
+}
+.search-bar input::placeholder { color: var(--text-muted); }
+.search-icon { font-size: 18px; color: var(--text-muted); }
+.lib-filter {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.lib-filter::-webkit-scrollbar { display: none; }
+.lib-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid transparent;
+}
+.lib-card:active { transform: scale(0.98); }
+.lib-card.open { border-color: var(--green-light); }
+.lib-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lib-name {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lib-emoji { font-size: 22px; }
+.lib-arrow { color: var(--text-muted); transition: transform 0.2s; }
+.lib-card.open .lib-arrow { transform: rotate(180deg); }
+.lib-detail {
+  display: none;
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.lib-card.open .lib-detail { display: block; }
+.lib-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.lib-row:last-child { border-bottom: none; }
+.lib-key { color: var(--text-muted); font-weight: 500; }
+.lib-val { font-weight: 600; text-align: right; max-width: 58%; }
+.typ-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+}
+.typ-haupt { background: var(--green-pale); color: var(--green-dark); }
+.typ-zwischen { background: var(--blue-pale); color: #1e40af; }
+.typ-winter { background: var(--purple-pale); color: #7c3aed; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 44px) + 70px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--green-dark);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLLBAR HIDE ── */
+.content::-webkit-scrollbar { display: none; }
+.content { scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<div class="app-header">
+  <h1>🌱 MeinGarten</h1>
+  <p id="header-sub">Berner Mittelland · 450 m ü.M.</p>
+</div>
+
+<div class="content">
+
+  <!-- ═══ TAB 1: BEETE ═══ -->
+  <div class="screen active" id="screen-beete">
+    <div class="year-selector" id="yearSelector"></div>
+    <div class="garden-layout">
+      <div class="garden-title">Gartenplan 2025</div>
+      <div class="kompost-box">🌿 Kompost</div>
+      <!-- Beete 1,2,3 – oben nebeneinander -->
+      <div class="beet-row" style="margin-bottom:7px">
+        <div class="beet folge-I" onclick="openBeet(1)" id="beet-1">
+          <div class="beet-nr">BEET 1</div>
+          <div class="beet-kultur">Mais · Zucchetti · Kürbis</div>
+          <div class="beet-folge">Folge I</div>
+        </div>
+        <div class="beet folge-I" onclick="openBeet(2)" id="beet-2">
+          <div class="beet-nr">BEET 2</div>
+          <div class="beet-kultur">Mais · Zucchetti · Kürbis</div>
+          <div class="beet-folge">Folge I</div>
+        </div>
+        <div class="beet folge-I" onclick="openBeet(3)" id="beet-3">
+          <div class="beet-nr">BEET 3</div>
+          <div class="beet-kultur">Mais · Zucchetti · Kürbis</div>
+          <div class="beet-folge">Folge I</div>
+        </div>
+      </div>
+      <div class="beet-grid" id="beetGrid"></div>
+    </div>
+
+    <!-- Side beds -->
+    <div class="section-label">Fixbeete</div>
+    <div class="special-row">
+      <div class="beet folge-VIII" style="min-height:50px" onclick="openBeet(14)">
+        <div class="beet-nr">BEET 14</div>
+        <div class="beet-kultur">Tomaten</div>
+        <div class="beet-folge">Folge VIII</div>
+      </div>
+      <div class="beet folge-IX" style="min-height:50px" onclick="openBeet(15)">
+        <div class="beet-nr">BEET 15/16</div>
+        <div class="beet-kultur">Peperoni · Paprika · Gurken</div>
+        <div class="beet-folge">Folge IX</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: KALENDER ═══ -->
+  <div class="screen" id="screen-kalender">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div id="kalEvents"></div>
+  </div>
+
+  <!-- ═══ TAB 3: TAGEBUCH ═══ -->
+  <div class="screen" id="screen-tagebuch">
+    <div class="tagebuch-filter">
+      <button class="filter-btn active" onclick="filterTagebuch('alle',this)">Alle Beete</button>
+      <button class="filter-btn" onclick="filterTagebuch('4',this)">Beet 4</button>
+      <button class="filter-btn" onclick="filterTagebuch('6',this)">Beet 6</button>
+      <button class="filter-btn" onclick="filterTagebuch('8',this)">Beet 8</button>
+      <button class="filter-btn" onclick="filterTagebuch('10',this)">Beet 10</button>
+      <button class="filter-btn" onclick="filterTagebuch('12',this)">Beet 12</button>
+      <button class="filter-btn" onclick="filterTagebuch('14',this)">Beet 14</button>
+    </div>
+    <div id="tagebuchList"></div>
+  </div>
+  <button class="add-entry-btn" id="addEntryBtn" onclick="showAddEntry()" style="display:none">+</button>
+
+  <!-- ═══ TAB 4: FRUCHTFOLGE ═══ -->
+  <div class="screen" id="screen-fruchtfolge">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.5">
+      10-Jahres-Rotation Beete 4–13. Das aktuelle Jahr ist hervorgehoben. Nach 10 Jahren kommt dieselbe Kultur wieder aufs gleiche Beet.
+    </p>
+    <div class="ff-scroll-hint">← Horizontal scrollen →</div>
+    <div class="ff-table-wrap">
+      <table class="ff-table" id="ffTable"></table>
+    </div>
+    <div class="ff-legende" id="ffLegende"></div>
+  </div>
+
+  <!-- ═══ TAB 5: BIBLIOTHEK ═══ -->
+  <div class="screen" id="screen-bibliothek">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="libSearch" placeholder="Suche Kultur…" oninput="filterLib()">
+    </div>
+    <div class="lib-filter" id="libFilter"></div>
+    <div id="libList"></div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('beete',this)" id="tab-beete">
+    <div class="tab-icon">🌿</div>
+    <div class="tab-label">Beete</div>
+  </div>
+  <div class="tab" onclick="showTab('kalender',this)" id="tab-kalender">
+    <div class="tab-icon">📅</div>
+    <div class="tab-label">Kalender</div>
+  </div>
+  <div class="tab" onclick="showTab('tagebuch',this)" id="tab-tagebuch">
+    <div class="tab-icon">📓</div>
+    <div class="tab-label">Tagebuch</div>
+  </div>
+  <div class="tab" onclick="showTab('fruchtfolge',this)" id="tab-fruchtfolge">
+    <div class="tab-icon">🔄</div>
+    <div class="tab-label">Fruchtfolge</div>
+  </div>
+  <div class="tab" onclick="showTab('bibliothek',this)" id="tab-bibliothek">
+    <div class="tab-icon">📚</div>
+    <div class="tab-label">Bibliothek</div>
+  </div>
+</div>
+
+<!-- Beet Detail Modal -->
+<div class="modal-overlay" id="beetModal" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modalContent">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-subtitle" id="mSubtitle"></div>
+    <div id="mBody"></div>
+    <button class="close-btn" onclick="closeModal()">Schliessen</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const CURRENT_YEAR_IDX = 0; // 2025 = index 0 in rotation
+
+// Fruchtfolge rotation (Jahre 26–35 = index offset from 2025)
+// 2025=yr0, 2026=yr1 … so "Jahr 26" in your table = year 2026 = idx 1
+const ffJahre = [26,27,28,29,30,31,32,33,34,35];
+const ffBeete = [4,5,6,7,8,9,10,11,12,13];
+const ffSeq   = ["II","ZW","KA","II","SW","II","KF","ZW","II","AB"];
+// Mapping slot → Folge-Kürzel
+const kulturSeq = ["II","III","V","II","VII","II","VI","III","II","IV"];
+const startSlot = {4:0,5:3,6:5,7:8,8:1,9:7,10:9,11:2,12:6,13:4};
+function getFF(beet, yearIdx) {
+  return kulturSeq[(startSlot[beet] + yearIdx) % 10];
+}
+
+const folgeNames = {
+  "II":  "Kartoffeln",
+  "III": "Zwiebeln & Karotten",
+  "IV":  "Auberginen, Bohnen",
+  "V":   "Kohlrabi, Kabis, Lauch",
+  "VI":  "Fenchel, Krautstiel",
+  "VII": "Schwarzwurzeln",
+};
+const folgeCls = {
+  "II":"ff-II","III":"ff-III","IV":"ff-IV","V":"ff-V","VI":"ff-VI","VII":"ff-VII"
+};
+const folgeLegColors = {
+  "II":"#ffedd5","III":"#fef9c3","IV":"#dbeafe","V":"#dcfce7","VI":"#ccfbf1","VII":"#f3e8ff"
+};
+
+// Beet data per year (yearOffset 0=2025, 1=2026 …)
+const beetDataFixed = {
+  1:  { kultur:"Mais · Zucchetti · Kürbis", folge:"I",   vor:"–",              haupt:"Mai (Mais säen, Zucchetti/Kürbis pflanzen)", nach:"Knoblauch (Sept)", ernte:"Aug–Okt" },
+  2:  { kultur:"Mais · Zucchetti · Kürbis", folge:"I",   vor:"–",              haupt:"Mai",                                        nach:"Knoblauch (Sept)", ernte:"Aug–Okt" },
+  3:  { kultur:"Mais · Zucchetti · Kürbis", folge:"I",   vor:"–",              haupt:"Mai",                                        nach:"Knoblauch (Sept)", ernte:"Aug–Okt" },
+  14: { kultur:"Tomaten",                   folge:"VIII", vor:"–",              haupt:"Mai (Jungpflanzen)",                         nach:"–",               ernte:"Jul–Okt" },
+  15: { kultur:"Peperoni, Paprika, Gurken", folge:"IX",  vor:"–",              haupt:"Mai (Jungpflanzen)",                         nach:"Winterlauch (Okt)",ernte:"Jul–Okt" },
+  16: { kultur:"Peperoni, Paprika, Gurken", folge:"IX",  vor:"–",              haupt:"Mai (Jungpflanzen)",                         nach:"Winterlauch (Okt)",ernte:"Jul–Okt" },
+};
+
+function getBeetData(beet, yearOffset) {
+  if (beetDataFixed[beet]) return beetDataFixed[beet];
+  const ff = getFF(beet, yearOffset);
+  const ffVor  = { "II":"–","III":"Frühlingszwiebeln (März)","IV":"–","V":"Spinat (Feb)","VI":"Radieschen (März)","VII":"–" };
+  const ffNach = { "II":"Nüssler od. Endivien (Aug)","III":"Nüssler (Sept)","IV":"Spinat (Sept)","V":"–","VI":"Zuckerhut (Sept)","VII":"–" };
+  const ffHaupt= { "II":"Feb (Stecken)","III":"Apr (Zwiebeln stecken, Karotten säen)","IV":"März/Mai (pflanzen/säen)","V":"Feb–Jun (pflanzen)","VI":"Mär–Jun (pflanzen)","VII":"April (säen)" };
+  const ffErnte= { "II":"Jul–Sept","III":"Jul–Okt","IV":"Jul–Okt","V":"Mai–März","VI":"Jun–Okt","VII":"Okt–Feb" };
+  return {
+    kultur: folgeNames[ff],
+    folge: ff,
+    vor:   ffVor[ff]   || "–",
+    haupt: ffHaupt[ff] || "–",
+    nach:  ffNach[ff]  || "–",
+    ernte: ffErnte[ff] || "–",
+  };
+}
+
+// Beet grid (4–13) layout: pairs
+const beetLayout = [[4,5],[6,7],[8,9],[10,11],[12,13]];
+
+// Calendar events
+const kalEvents = {
+  1:  [
+    { typ:"pflege",   icon:"🌱", title:"Anzucht starten",          detail:"Auberginen, Tomaten, Peperoni", beet:"–" },
+    { typ:"saen",     icon:"🌱", title:"Spinat säen (Vorkultur)",   detail:"Beet V-Gruppe: Spinat als Vorkultur", beet:"Beete 6,7,11" },
+  ],
+  2:  [
+    { typ:"stecken",  icon:"🥔", title:"Kartoffeln stecken",        detail:"Frühkartoffeln; 2 Reihen, 30 cm Abstand, 10 cm in Reihe", beet:"Beete 4–7" },
+    { typ:"pflanzen", icon:"🧅", title:"Frühlingszwiebeln stecken", detail:"Vorkultur vor Zwiebeln & Karotten", beet:"Beete 8,9" },
+    { typ:"saen",     icon:"🌿", title:"Radieschen säen",           detail:"Vorkultur vor Fenchel & Krautstiel", beet:"Beete 12,13" },
+  ],
+  3:  [
+    { typ:"pflanzen", icon:"🍆", title:"Auberginen-Anzucht",        detail:"Anzucht innen bei mind. 20°C; Pflanzung erst Ende Mai!", beet:"Beet 10" },
+    { typ:"saen",     icon:"🥕", title:"Karotten säen",             detail:"Direktsaat, 2 Reihen, 20 cm Abstand", beet:"Beete 8,9" },
+    { typ:"ernte",    icon:"🥬", title:"Spinat ernten",             detail:"Vorkultur-Spinat vor Hauptkultur räumen", beet:"Beete 6,7,11" },
+  ],
+  4:  [
+    { typ:"stecken",  icon:"🧅", title:"Zwiebeln stecken",          detail:"2 Reihen, 40 cm Abstand, 8 cm in Reihe", beet:"Beete 8,9" },
+    { typ:"pflanzen", icon:"🥦", title:"Kohlrabi pflanzen (1. Satz)",detail:"1 Reihe, 30 cm Abstand, 20 cm in Reihe", beet:"Beet 11" },
+    { typ:"saen",     icon:"🌿", title:"Schwarzwurzeln säen",       detail:"Direktsaat April, frisches Saatgut verwenden!", beet:"Beet 13" },
+    { typ:"ernte",    icon:"🌱", title:"Frühlingszwiebeln ernten",  detail:"Beet für Zwiebeln/Karotten freimachen", beet:"Beete 8,9" },
+  ],
+  5:  [
+    { typ:"saen",     icon:"🌽", title:"Mais säen",                 detail:"Direktsaat; in Blöcken 3×3, 30 cm Abstand, 10 cm in Reihe", beet:"Beete 1,2,3" },
+    { typ:"pflanzen", icon:"🥒", title:"Zucchetti & Kürbis pflanzen",detail:"Je 2 Pflanzen pro Beet; nach letztem Frost!", beet:"Beete 1,2,3" },
+    { typ:"pflanzen", icon:"🍅", title:"Tomaten pflanzen",          detail:"6 Jungpflanzen, nach Eisheiligen (15. Mai)", beet:"Beet 14" },
+    { typ:"pflanzen", icon:"🌶", title:"Peperoni/Paprika/Gurken",   detail:"Je 2–3 Jungpflanzen nach letztem Frost", beet:"Beete 15,16" },
+    { typ:"pflanzen", icon:"🍆", title:"Auberginen pflanzen",       detail:"3 Pflanzen, warmer Standort, Windschutz", beet:"Beet 10" },
+    { typ:"saen",     icon:"🫘", title:"Buschbohnen säen",          detail:"2 Reihen, 30 cm Abstand, 4 cm in Reihe", beet:"Beet 10" },
+    { typ:"pflanzen", icon:"🥬", title:"Blaukabis pflanzen",        detail:"1 Pflanze; 50 cm Abstand", beet:"Beet 11" },
+    { typ:"pflanzen", icon:"🥬", title:"Lauch pflanzen",            detail:"2 Reihen, 10 cm in Reihe", beet:"Beet 11" },
+    { typ:"pflanzen", icon:"🥬", title:"Fenchel pflanzen (1. Satz)",detail:"1 Reihe, 30 cm Abstand, 20 cm in Reihe", beet:"Beet 12" },
+  ],
+  6:  [
+    { typ:"pflanzen", icon:"🥬", title:"Krautstiel pflanzen",       detail:"3 Pflanzen; laufend äussere Blätter ernten", beet:"Beet 12" },
+    { typ:"ernte",    icon:"🥬", title:"Kohlrabi erste Ernte",      detail:"Wenn Knolle tennisballgross; laufend nachernte", beet:"Beet 11" },
+    { typ:"ernte",    icon:"🥬", title:"Krautstiel erste Ernte",    detail:"Äussere Blätter schneiden", beet:"Beet 12" },
+  ],
+  7:  [
+    { typ:"ernte",    icon:"🥔", title:"Frühkartoffeln ernten",     detail:"Wenn Laub welkt; volle Ernte bis September", beet:"Beete 4–7" },
+    { typ:"ernte",    icon:"🧅", title:"Zwiebeln ernten",           detail:"Wenn Blätter gelb/umgeknickt; liegenl. trocknen", beet:"Beete 8,9" },
+    { typ:"ernte",    icon:"🥕", title:"Karotten erste Ernte",      detail:"Laufende Ernte bis Oktober", beet:"Beete 8,9" },
+    { typ:"ernte",    icon:"🍅", title:"Tomaten erste Ernte",       detail:"Laufende Ernte bis Oktober", beet:"Beet 14" },
+    { typ:"ernte",    icon:"🫘", title:"Buschbohnen ernten",        detail:"Laufende Ernte bis September", beet:"Beet 10" },
+    { typ:"ernte",    icon:"🥒", title:"Zucchetti erste Ernte",     detail:"Klein ernten – fördert Neubildung!", beet:"Beete 1,2,3" },
+  ],
+  8:  [
+    { typ:"saen",     icon:"🥬", title:"Nüssler säen",              detail:"Nach Kartoffelernte; 5 Reihen, 15 cm Abstand", beet:"Beete 4–7 (2 Beete)" },
+    { typ:"pflanzen", icon:"🥬", title:"Endivien pflanzen ★",       detail:"NEU: 2 Reihen, 30 cm Abstand nach Kartoffelernte", beet:"Beete 4–7 (2 Beete)" },
+    { typ:"saen",     icon:"🌿", title:"Spinat säen (Folgekultur)", detail:"Nach Bohnen; Herbst-Spinat", beet:"Beet 10" },
+    { typ:"ernte",    icon:"🍆", title:"Auberginen ernten",         detail:"Laufende Ernte bis Oktober", beet:"Beet 10" },
+    { typ:"ernte",    icon:"🎃", title:"Kürbis erste Ernte",        detail:"Wenn Stiel verkorkt; laufend ernten", beet:"Beete 1,2,3" },
+  ],
+  9:  [
+    { typ:"stecken",  icon:"🧄", title:"Knoblauch stecken",         detail:"6 Reihen, 15 cm Abstand, 25 cm in Reihe; 5 cm tief", beet:"Beete 1,2,3" },
+    { typ:"saen",     icon:"🥬", title:"Nüssler säen (Folge III)",  detail:"Nach Zwiebeln & Karotten", beet:"Beete 8,9" },
+    { typ:"saen",     icon:"🥬", title:"Zuckerhut pflanzen",        detail:"Nach Fenchel/Krautstiel", beet:"Beet 12" },
+    { typ:"ernte",    icon:"🥬", title:"Schwarzwurzeln (Start)",    detail:"Laufende Ernte bis Februar; bei Frost süsser", beet:"Beet 13" },
+    { typ:"ernte",    icon:"🥬", title:"Fenchel ernten",            detail:"Vollständige Ernte bis Oktober", beet:"Beet 12" },
+  ],
+  10: [
+    { typ:"pflanzen", icon:"🥬", title:"Winterlauch pflanzen ★",    detail:"NEU: 2 Reihen nach Peperoni/Gurken-Ernte; überwintert", beet:"Beete 15,16" },
+    { typ:"ernte",    icon:"🎃", title:"Kürbis Haupternte",         detail:"Vollständige Ernte; trocken lagern", beet:"Beete 1,2,3" },
+    { typ:"ernte",    icon:"🌽", title:"Mais Haupternte",           detail:"Kolben ernten wenn Fäden braun", beet:"Beete 1,2,3" },
+    { typ:"ernte",    icon:"🥬", title:"Endivien ernten",           detail:"Bis vor starkem Frost", beet:"Beete 4–7 (2 Beete)" },
+    { typ:"ernte",    icon:"🥬", title:"Zuckerhut ernten",          detail:"Laufende Ernte bis Dezember", beet:"Beet 12" },
+    { typ:"ernte",    icon:"🥦", title:"Blaukabis ernten",          detail:"Spätkohlsorte – frosthart", beet:"Beet 11" },
+  ],
+  11: [
+    { typ:"ernte",    icon:"🥬", title:"Nüssler (Start)",           detail:"Laufende Ernte bis März; winterhart", beet:"Beete 4–7" },
+    { typ:"ernte",    icon:"🥬", title:"Lauch ernten",              detail:"Laufende Ernte bis März; frosthart", beet:"Beet 11" },
+    { typ:"ernte",    icon:"🥬", title:"Schwarzwurzeln",            detail:"Laufende Ernte; bei Frost süsser", beet:"Beet 13" },
+  ],
+  12: [
+    { typ:"ernte",    icon:"🥬", title:"Zuckerhut letzte Ernte",    detail:"Vor stärkerem Dauerfrost einbringen", beet:"Beet 12" },
+    { typ:"ernte",    icon:"🥬", title:"Nüssler & Lauch",           detail:"Winterernte läuft weiter", beet:"Beete 4–7, Beet 11" },
+    { typ:"pflege",   icon:"🛠",  title:"Beete wintervorbereiten",   detail:"Kompost einarbeiten, Beete mulchen", beet:"Alle" },
+  ],
+};
+
+// Tagebuch entries
+let tagebuchEntries = [
+  { id:1, datum:"12. Mai 2025",   beet:"Beet 4", kat:"Pflanzung", text:"Kartoffeln gesteckt. Boden gut vorbereitet, etwas feucht. 2 Reihen à 10 Stück.", emoji:"🥔", katClass:"typ-haupt" },
+  { id:2, datum:"18. Mai 2025",   beet:"Beet 14", kat:"Pflanzung", text:"Tomaten eingepflanzt, 6 Jungpflanzen der Sorte «Tigerella». Stäbe gesetzt.", emoji:"🍅", katClass:"typ-haupt" },
+  { id:3, datum:"2. Juni 2025",   beet:"Beet 10", kat:"Beobachtung", text:"Auberginen sehen gut aus. Erste Blüten sichtbar. Bohnen aufgelaufen.", emoji:"🍆", katClass:"typ-zwischen" },
+  { id:4, datum:"15. Juni 2025",  beet:"Beet 12", kat:"Ernte", text:"Erste Krautstiel-Blätter geerntet, ca. 400g. Fenchel wächst prächtig.", emoji:"✂️", katClass:"typ-winter" },
+  { id:5, datum:"28. Juni 2025",  beet:"Beet 8", kat:"Pflege", text:"Zwiebeln gehäufelt. Karotten ausgedünnt auf 4 cm. Bewässert.", emoji:"🧅", katClass:"typ-haupt" },
+];
+
+// Library data
+const bibliothek = [
+  { name:"Kartoffeln", emoji:"🥔", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Feb–April (Stecken)", ernte:"Juli–September",
+    reihen:"2", abstand:"30 cm", inReihe:"10 cm",
+    vor:"–", nach:"Nüssler od. Endivien",
+    folge:"Folge II", pause:"5 Jahre",
+    hinweis:"Nicht nach Tomaten/Auberginen. Frühkart. ab Juli. Lagersorten Sept." },
+  { name:"Zwiebeln", emoji:"🧅", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"März–April (Steckzwiebeln)", ernte:"Juli–August",
+    reihen:"2", abstand:"40 cm", inReihe:"8 cm",
+    vor:"Frühlingszwiebeln", nach:"Nüssler",
+    folge:"Folge III", pause:"4 Jahre",
+    hinweis:"Nach Blattfall trocknen. Nicht nach Lauch/Knoblauch." },
+  { name:"Karotten", emoji:"🥕", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"April–Juni (gestaffelt)", ernte:"Juli–Oktober",
+    reihen:"2", abstand:"20 cm", inReihe:"4 cm",
+    vor:"Frühlingszwiebeln", nach:"–",
+    folge:"Folge III", pause:"4 Jahre",
+    hinweis:"Alle 3 Wochen neu säen. Nicht nach Fenchel/Sellerie." },
+  { name:"Mais", emoji:"🌽", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mitte Mai (Direktsaat)", ernte:"August–September",
+    reihen:"3", abstand:"30 cm", inReihe:"10 cm",
+    vor:"–", nach:"Knoblauch (Sept)",
+    folge:"Folge I", pause:"–",
+    hinweis:"In Blöcken 3×3 säen – Windbestäubung! Nicht in Reihen." },
+  { name:"Zucchetti", emoji:"🥒", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai (vorgezogen ab April)", ernte:"Juli–Oktober",
+    reihen:"2 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"–", nach:"Knoblauch",
+    folge:"Folge I", pause:"4 Jahre",
+    hinweis:"Klein ernten – fördert Neubildung. Starkzehrer, Kompost einarbeiten." },
+  { name:"Kürbis", emoji:"🎃", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai (vorgezogen ab April)", ernte:"September–Oktober",
+    reihen:"2 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"–", nach:"Knoblauch",
+    folge:"Folge I", pause:"4 Jahre",
+    hinweis:"Bodendecker unterdrückt Unkraut. Ernte wenn Stiel verkorkt. Trocken lagern." },
+  { name:"Auberginen", emoji:"🍆", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Feb–März (Anzucht 20°C)", ernte:"August–Oktober",
+    reihen:"3 Pflanzen", abstand:"0 cm", inReihe:"20 cm",
+    vor:"–", nach:"Spinat",
+    folge:"Folge IV", pause:"4 Jahre",
+    hinweis:"Erst nach letztem Frost pflanzen. Warmer, windgeschützter Standort." },
+  { name:"Buschbohnen", emoji:"🫘", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mitte Mai–Juni", ernte:"Juli–September",
+    reihen:"2", abstand:"30 cm", inReihe:"4 cm",
+    vor:"–", nach:"Spinat",
+    folge:"Folge IV", pause:"3 Jahre",
+    hinweis:"Stickstoffsammler. Nicht vor letztem Frost säen." },
+  { name:"Kohlrabi", emoji:"🥦", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"April–Juni (gestaffelt)", ernte:"Mai–Oktober",
+    reihen:"1", abstand:"30 cm", inReihe:"20 cm",
+    vor:"Spinat", nach:"–",
+    folge:"Folge V", pause:"3 Jahre",
+    hinweis:"Alle 3 Wochen neu pflanzen. Nicht nach Kohl/Raps." },
+  { name:"Blaukabis", emoji:"🥬", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Feb–März (Anzucht)", ernte:"August–November",
+    reihen:"1", abstand:"50 cm", inReihe:"50 cm",
+    vor:"Spinat", nach:"–",
+    folge:"Folge V", pause:"3 Jahre",
+    hinweis:"Spätkohlsorte – frosthart. Mindestabstand 50 cm." },
+  { name:"Lauch", emoji:"🌿", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Januar–Februar (Anzucht)", ernte:"November–März",
+    reihen:"2", abstand:"0 cm", inReihe:"10 cm",
+    vor:"Spinat", nach:"–",
+    folge:"Folge V", pause:"4 Jahre",
+    hinweis:"Winterlauch bleibt bis März im Beet. Frosthart." },
+  { name:"Fenchel", emoji:"🌿", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai–Juni (nicht zu früh!)", ernte:"August–Oktober",
+    reihen:"1", abstand:"30 cm", inReihe:"20 cm",
+    vor:"Radieschen", nach:"Zuckerhut",
+    folge:"Folge VI", pause:"3 Jahre",
+    hinweis:"Schiesst bei Kälte – erst ab Mai pflanzen. Nicht nach Karotten." },
+  { name:"Krautstiel", emoji:"🥬", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"April (Pflanzung)", ernte:"Juni–Oktober",
+    reihen:"3 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"Radieschen", nach:"Zuckerhut",
+    folge:"Folge VI", pause:"3 Jahre",
+    hinweis:"Äussere Blätter laufend schneiden – sehr produktiv." },
+  { name:"Schwarzwurzeln", emoji:"🌑", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"April (frisches Saatgut!)", ernte:"Oktober–Februar",
+    reihen:"3", abstand:"30 cm", inReihe:"4 cm",
+    vor:"–", nach:"–",
+    folge:"Folge VII", pause:"3 Jahre",
+    hinweis:"Tiefwurzler – lockert Boden. Nach Frost süsser. Frisches Saatgut wichtig!" },
+  { name:"Tomaten", emoji:"🍅", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai (Jungpflanzen)", ernte:"Juli–Oktober",
+    reihen:"6 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"–", nach:"–",
+    folge:"Folge VIII (Beet 14)", pause:"4 Jahre",
+    hinweis:"Beet 14 fix. Nach Eisheiligen pflanzen. Nicht nach Kartoffeln." },
+  { name:"Pepperoni / Paprika", emoji:"🌶", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai (Jungpflanzen)", ernte:"Juli–Oktober",
+    reihen:"2 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"–", nach:"Winterlauch ★",
+    folge:"Folge IX (Beete 15,16)", pause:"4 Jahre",
+    hinweis:"Beete 15,16 fix. Warmer Standort. Ähnliche Bedürfnisse wie Tomaten." },
+  { name:"Gurken", emoji:"🥒", typ:"haupt", typLabel:"Hauptkultur",
+    saat:"Mai (Jungpflanzen)", ernte:"Juli–Oktober",
+    reihen:"3 Pflanzen", abstand:"–", inReihe:"–",
+    vor:"–", nach:"Winterlauch ★",
+    folge:"Folge IX (Beete 15,16)", pause:"4 Jahre",
+    hinweis:"Regelmässig giessen. Früchte klein ernten fördert Neubildung." },
+  // Zwischenkulturen
+  { name:"Spinat", emoji:"🌱", typ:"zwischen", typLabel:"Vor-/Zwischenkultur",
+    saat:"Feb–März / Aug–Sept", ernte:"Apr–Mai / Okt–Nov",
+    reihen:"5", abstand:"15 cm", inReihe:"5 cm",
+    vor:"–", nach:"–",
+    folge:"Vor- oder Folgekultur", pause:"–",
+    hinweis:"Frosthart –8°C. Schnellste Vorkultur. Nicht nach Krautstiel." },
+  { name:"Nüssler (Feldsalat)", emoji:"🥗", typ:"zwischen", typLabel:"Folgekultur / Winter",
+    saat:"August–September", ernte:"Oktober–März",
+    reihen:"5", abstand:"15 cm", inReihe:"5 cm",
+    vor:"–", nach:"–",
+    folge:"Folgekultur (nach Kartoffeln, Zwiebeln)", pause:"–",
+    hinweis:"Winterhart. Wenig Pflege. Ideal nach Kartoffeln." },
+  { name:"Endivien ★", emoji:"🥬", typ:"zwischen", typLabel:"Folgekultur (NEU)",
+    saat:"August (Pflanzung)", ernte:"Oktober–November",
+    reihen:"2", abstand:"30 cm", inReihe:"25 cm",
+    vor:"–", nach:"–",
+    folge:"Folgekultur nach Kartoffeln", pause:"–",
+    hinweis:"NEU: Nach Frühkartoffeln (Juli) → genug Zeit. Vor Frost einbringen." },
+  { name:"Zuckerhut", emoji:"🥬", typ:"zwischen", typLabel:"Folgekultur",
+    saat:"September (Pflanzung)", ernte:"Oktober–Dezember",
+    reihen:"2", abstand:"30 cm", inReihe:"25 cm",
+    vor:"–", nach:"–",
+    folge:"Folgekultur (nach Fenchel/Krautstiel)", pause:"–",
+    hinweis:"Frosthart bis –5°C. Robuster als Endivien." },
+  { name:"Knoblauch", emoji:"🧄", typ:"winter", typLabel:"Winterkultur / Folgekultur",
+    saat:"September–Oktober (Stecken, 5 cm tief)", ernte:"Mai–Juni",
+    reihen:"6", abstand:"15 cm", inReihe:"25 cm",
+    vor:"–", nach:"–",
+    folge:"Folgekultur (nach Mais/Kürbis)", pause:"–",
+    hinweis:"Überwintert problemlos auf 450 m. Bodensanierend." },
+  { name:"Winterlauch ★", emoji:"🌿", typ:"winter", typLabel:"Folgekultur (NEU)",
+    saat:"Oktober (Jungpflanzen, vorgez. ab Feb)", ernte:"März",
+    reihen:"2", abstand:"0 cm", inReihe:"10 cm",
+    vor:"–", nach:"–",
+    folge:"Folgekultur nach Peperoni/Gurken", pause:"–",
+    hinweis:"NEU: Beete 15,16 Oktober pflanzen nach Räumung. Frosthart." },
+  { name:"Frühlingszwiebeln", emoji:"🌱", typ:"zwischen", typLabel:"Vorkultur",
+    saat:"März–April", ernte:"Mai–Juni",
+    reihen:"–", abstand:"–", inReihe:"–",
+    vor:"–", nach:"Zwiebeln",
+    folge:"Vorkultur (vor Zwiebeln/Karotten)", pause:"–",
+    hinweis:"8–10 Wochen Standzeit. Ideal als Lücken-/Vorkultur." },
+  { name:"Radieschen", emoji:"🌸", typ:"zwischen", typLabel:"Vorkultur",
+    saat:"März–August (alle 2–3 Wo.)", ernte:"4–6 Wochen nach Saat",
+    reihen:"5", abstand:"15 cm", inReihe:"5 cm",
+    vor:"–", nach:"Fenchel",
+    folge:"Vorkultur (vor Fenchel/Krautstiel)", pause:"–",
+    hinweis:"Schnellste Vorkultur. Zeigt Bodengare an." },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentTab    = 'beete';
+let currentYear   = 0;  // 0 = 2025
+let currentMonth  = new Date().getMonth() + 1; // 1–12
+let libFilter     = 'alle';
+let tbFilter      = 'alle';
+
+const months = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showTab(tab, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  el.classList.add('active');
+  currentTab = tab;
+
+  const titles = {
+    beete:'Berner Mittelland · 450 m ü.M.',
+    kalender:'Anbaukalender 2025',
+    tagebuch:'Garten-Tagebuch',
+    fruchtfolge:'10-Jahres-Rotation',
+    bibliothek:'Kultursteckbriefe'
+  };
+  document.getElementById('header-sub').textContent = titles[tab];
+
+  // show/hide FAB
+  document.getElementById('addEntryBtn').style.display = tab === 'tagebuch' ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 1: BEETE
+// ═══════════════════════════════════════════════════════
+function buildYearSelector() {
+  const el = document.getElementById('yearSelector');
+  const years = [2025,2026,2027,2028,2029,2030];
+  el.innerHTML = years.map((y,i) =>
+    `<button class="year-btn ${i===currentYear?'active':''}" onclick="selectYear(${i},this)">${y}</button>`
+  ).join('');
+}
+
+function selectYear(idx, btn) {
+  currentYear = idx;
+  document.querySelectorAll('.year-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildBeetGrid();
+  document.querySelector('.garden-title').textContent = 'Gartenplan ' + (2025 + idx);
+}
+
+const folgeClass = {"II":"folge-II","III":"folge-III","IV":"folge-IV","V":"folge-V","VI":"folge-VI","VII":"folge-VII"};
+
+function buildBeetGrid() {
+  const grid = document.getElementById('beetGrid');
+  grid.innerHTML = beetLayout.map(([a,b]) => `
+    <div class="beet-row">
+      ${buildBeet(a)} ${buildBeet(b)}
+    </div>`).join('');
+}
+
+function buildBeet(b) {
+  const d = getBeetData(b, currentYear);
+  const cls = folgeClass[d.folge] || 'folge-II';
+  return `<div class="beet ${cls}" onclick="openBeet(${b})" id="beet-${b}">
+    <div class="beet-nr">BEET ${b}</div>
+    <div class="beet-kultur">${d.kultur}</div>
+    <div class="beet-folge">Folge ${d.folge}</div>
+  </div>`;
+}
+
+function openBeet(b) {
+  const yr = 2025 + currentYear;
+  const d = getBeetData(b, currentYear);
+  document.getElementById('mTitle').textContent = `Beet ${b}`;
+  document.getElementById('mSubtitle').textContent = `${d.kultur} · Folge ${d.folge} · ${yr}`;
+  document.getElementById('mBody').innerHTML = `
+    <div class="info-row"><span class="info-label">🌱 Vorkultur</span><span class="info-val">${d.vor}</span></div>
+    <div class="info-row"><span class="info-label">🌿 Hauptkultur</span><span class="info-val">${d.haupt}</span></div>
+    <div class="info-row"><span class="info-label">🍂 Folgekultur</span><span class="info-val">${d.nach}</span></div>
+    <div class="info-row"><span class="info-label">✂️ Ernte</span><span class="info-val">${d.ernte}</span></div>
+    <div class="info-row"><span class="info-label">📅 Jahr</span><span class="info-val">${yr}</span></div>
+  `;
+  document.getElementById('beetModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('beetModal')) {
+    document.getElementById('beetModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 2: KALENDER
+// ═══════════════════════════════════════════════════════
+function buildKalender() {
+  document.getElementById('monthLabel').textContent = months[currentMonth-1] + ' 2025';
+  const events = kalEvents[currentMonth] || [];
+  const el = document.getElementById('kalEvents');
+  if (!events.length) {
+    el.innerHTML = '<div class="empty-month">🌨 Keine geplanten Aktionen in diesem Monat</div>';
+    return;
+  }
+  el.innerHTML = events.map(e => `
+    <div class="kal-event ${e.typ}">
+      <div class="kal-icon">${e.icon}</div>
+      <div class="kal-text">
+        <h4>${e.title}</h4>
+        <p>${e.detail}</p>
+        <span class="beet-tag">${e.beet}</span>
+      </div>
+    </div>`).join('');
+}
+
+function changeMonth(d) {
+  currentMonth += d;
+  if (currentMonth < 1) currentMonth = 12;
+  if (currentMonth > 12) currentMonth = 1;
+  buildKalender();
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 3: TAGEBUCH
+// ═══════════════════════════════════════════════════════
+function buildTagebuch() {
+  const el = document.getElementById('tagebuchList');
+  const filtered = tbFilter === 'alle' ? tagebuchEntries
+    : tagebuchEntries.filter(e => e.beet.includes(tbFilter));
+  el.innerHTML = filtered.map(e => `
+    <div class="tagebuch-entry">
+      <div class="entry-header">
+        <div>
+          <div style="font-weight:700;font-size:14px">${e.beet}</div>
+          <div class="entry-meta">${e.datum}</div>
+        </div>
+        <span class="entry-cat ${e.katClass}">${e.emoji} ${e.kat}</span>
+      </div>
+      <div class="entry-text">${e.text}</div>
+    </div>`).join('');
+  if (!filtered.length) el.innerHTML = '<div class="empty-month">Keine Einträge</div>';
+}
+
+function filterTagebuch(f, btn) {
+  tbFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildTagebuch();
+}
+
+function showAddEntry() {
+  showToast('📝 Tagebucheintrag – In der nativen App können Sie hier Fotos aufnehmen und Notizen erfassen.');
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 4: FRUCHTFOLGE
+// ═══════════════════════════════════════════════════════
+function buildFruchtfolge() {
+  // Table
+  const tbl = document.getElementById('ffTable');
+  // Jahre 26–35 = year offsets 1–10 from 2025
+  const yearOffsets = [1,2,3,4,5,6,7,8,9,10];
+  const dispYears   = [26,27,28,29,30,31,32,33,34,35];
+
+  let html = '<thead><tr><th>Beet / Jahr</th>';
+  dispYears.forEach(y => html += `<th>${y}</th>`);
+  html += '</tr></thead><tbody>';
+
+  ffBeete.forEach(b => {
+    html += `<tr><td>Beet ${b}</td>`;
+    yearOffsets.forEach((yo, i) => {
+      const ff = getFF(b, yo);
+      const cls = folgeCls[ff] || '';
+      html += `<td class="${cls}">${ff}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // Legende
+  const leg = document.getElementById('ffLegende');
+  leg.innerHTML = Object.entries(folgeNames).map(([k,v]) =>
+    `<div class="ff-leg-item">
+      <div class="ff-leg-dot" style="background:${folgeLegColors[k]}"></div>
+      <span><b>${k}</b> – ${v}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 5: BIBLIOTHEK
+// ═══════════════════════════════════════════════════════
+function buildLibFilter() {
+  const filters = [
+    { key:'alle',     label:'Alle' },
+    { key:'haupt',    label:'Hauptkulturen' },
+    { key:'zwischen', label:'Zwischenkulturen' },
+    { key:'winter',   label:'Winterkulturen' },
+  ];
+  document.getElementById('libFilter').innerHTML = filters.map(f =>
+    `<button class="filter-btn ${libFilter===f.key?'active':''}" onclick="setLibFilter('${f.key}',this)">${f.label}</button>`
+  ).join('');
+}
+
+function setLibFilter(f, btn) {
+  libFilter = f;
+  document.querySelectorAll('#libFilter .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLib();
+}
+
+function filterLib() {
+  renderLib();
+}
+
+function renderLib() {
+  const q = document.getElementById('libSearch').value.toLowerCase();
+  const filtered = bibliothek.filter(k => {
+    const matchTyp  = libFilter === 'alle' || k.typ === libFilter;
+    const matchSuch = !q || k.name.toLowerCase().includes(q);
+    return matchTyp && matchSuch;
+  });
+
+  document.getElementById('libList').innerHTML = filtered.map(k => `
+    <div class="lib-card" onclick="toggleLib(this)">
+      <div class="lib-card-header">
+        <div class="lib-name">
+          <span class="lib-emoji">${k.emoji}</span>
+          ${k.name}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="typ-badge typ-${k.typ}">${k.typLabel}</span>
+          <span class="lib-arrow">▾</span>
+        </div>
+      </div>
+      <div class="lib-detail">
+        <div class="lib-row"><span class="lib-key">🌱 Saat/Pflanzung</span><span class="lib-val">${k.saat}</span></div>
+        <div class="lib-row"><span class="lib-key">✂️ Ernte</span><span class="lib-val">${k.ernte}</span></div>
+        <div class="lib-row"><span class="lib-key">📏 Reihen</span><span class="lib-val">${k.reihen}</span></div>
+        <div class="lib-row"><span class="lib-key">↔️ Reihenabstand</span><span class="lib-val">${k.abstand || '–'}</span></div>
+        <div class="lib-row"><span class="lib-key">↕️ Abstand in Reihe</span><span class="lib-val">${k.inReihe || '–'}</span></div>
+        <div class="lib-row"><span class="lib-key">⬅️ Vorkultur</span><span class="lib-val">${k.vor}</span></div>
+        <div class="lib-row"><span class="lib-key">➡️ Folgekultur</span><span class="lib-val">${k.nach}</span></div>
+        <div class="lib-row"><span class="lib-key">🔄 Fruchtfolge</span><span class="lib-val">${k.folge}</span></div>
+        <div class="lib-row"><span class="lib-key">⏱ Mindestpause</span><span class="lib-val">${k.pause}</span></div>
+        <div class="lib-row"><span class="lib-key">💡 Hinweis</span><span class="lib-val" style="font-size:11px;font-weight:400;color:#555">${k.hinweis}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleLib(el) {
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.lib-card.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+buildYearSelector();
+buildBeetGrid();
+buildKalender();
+buildTagebuch();
+buildFruchtfolge();
+buildLibFilter();
+renderLib();
+</script>
+</body>
+</html>
