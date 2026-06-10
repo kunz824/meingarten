@@ -517,6 +517,63 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     </div>
   </div>
 
+  <!-- REGENMESSER -->
+  <div class="pt">🌧 Regenmesser</div>
+  <div class="pc">
+    <!-- Tages/Wochen/Monats-Anzeige -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div style="background:#dbeafe;border-radius:12px;padding:10px;text-align:center">
+        <div id="regenHeute" style="font-size:22px;font-weight:800;color:#1e40af">0.0</div>
+        <div style="font-size:10px;color:#1e40af;font-weight:600;margin-top:2px">mm heute</div>
+      </div>
+      <div style="background:#e0f2fe;border-radius:12px;padding:10px;text-align:center">
+        <div id="regenWoche" style="font-size:22px;font-weight:800;color:#0369a1">0.0</div>
+        <div style="font-size:10px;color:#0369a1;font-weight:600;margin-top:2px">mm Woche</div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:12px;padding:10px;text-align:center">
+        <div id="regenMonat" style="font-size:22px;font-weight:800;color:#075985">0.0</div>
+        <div style="font-size:10px;color:#075985;font-weight:600;margin-top:2px">mm Monat</div>
+      </div>
+    </div>
+    <!-- Letzter Regen -->
+    <div class="pr">
+      <div class="prl">📅 Letzter Regen</div>
+      <div class="prv" id="regenLetzt">–</div>
+    </div>
+    <div class="pr">
+      <div class="prl">📊 Jahr 2026 total</div>
+      <div class="prv" id="regenJahr">0.0 mm</div>
+    </div>
+    <!-- Manuell erfassen -->
+    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📝 Regen manuell erfassen</div>
+      <div class="pr">
+        <div class="prl">💧 Menge (mm)</div>
+        <div class="step">
+          <button onclick="chRegenMenge(-1)">−</button>
+          <span id="regenMengeVal" style="min-width:52px;text-align:center">2.0 mm</span>
+          <button onclick="chRegenMenge(1)">+</button>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="prl">📅 Datum</div>
+        <input type="date" id="regenDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)">
+      </div>
+      <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <div class="prl">📝 Notiz</div>
+        <textarea class="ni" id="regenNotiz" rows="2" placeholder="z.B. Starkregen, Gewitter, leichter Landregen…"></textarea>
+      </div>
+      <button class="sbtn" onclick="regenEintr()">✅ Regenmessung eintragen</button>
+    </div>
+    <!-- Regenhistorie -->
+    <div class="dlog" id="regenLogEl" style="margin-top:10px"></div>
+    <!-- Hinweis -->
+    <div style="margin-top:10px;background:#f0f9ff;border-radius:8px;padding:10px 12px;font-size:12px;color:#0369a1;line-height:1.6">
+      🌧 <b>Sensor:</b> DFRobot Gravity Kippzähler (ESP32 GPIO19). Jeder Kipp = 0.28 mm.<br>
+      Autonomer Betrieb – beeinflusst die Bewässerungslogik <b>nicht</b> (Tomaten unter Dach!).
+    </div>
+  </div>
+
   <div class="pt">🌡 Sensoren & Status</div>
   <div class="pc">
     <div class="pr"><div class="prl">🌧 Regensensor</div>
@@ -1396,6 +1453,107 @@ function loadTank() {
   }
 }
 
+// ══ REGENMESSER ══════════════════════════════════════════
+let regenLog = [];       // {d, mm, notiz}
+let regenMengeIdx = 4;   // Index in regenMengeOpts
+const regenMengeOpts = [
+  '0.2 mm','0.5 mm','1.0 mm','2.0 mm','3.0 mm','5.0 mm',
+  '7.0 mm','10.0 mm','15.0 mm','20.0 mm','25.0 mm','30.0 mm','40.0 mm','50.0 mm'
+];
+
+function chRegenMenge(d){
+  regenMengeIdx = Math.max(0, Math.min(regenMengeOpts.length-1, regenMengeIdx+d));
+  const el = document.getElementById('regenMengeVal');
+  if(el) el.textContent = regenMengeOpts[regenMengeIdx];
+}
+
+function regenEintr(){
+  const mm  = regenMengeOpts[regenMengeIdx];
+  const datEl = document.getElementById('regenDatum');
+  const notEl = document.getElementById('regenNotiz');
+  const notiz = notEl ? notEl.value.trim() : '';
+  // Datum: falls leer → heute
+  let d = datEl && datEl.value ? datEl.value : null;
+  if(d){ const p=d.split('-'); d=p[2]+'.'+p[1]+'.'+p[0]; }
+  else { d = nowStr(); }
+  const mmNum = parseFloat(mm);
+  regenLog.unshift({d, mm: mmNum, notiz});
+  if(notEl) notEl.value='';
+  // Auch als Journal-Eintrag
+  tbEntries.unshift({
+    id: Date.now(), datum: d, beet:'–', kat:'Regen',
+    txt:'Regen: '+mm+(notiz?' – '+notiz:''),
+    due:'', emoji:'🌧', katC:'tz'
+  });
+  renderRegenLog();
+  renderRegenStats();
+  renderJournal();
+  saveAll();
+  toast('✅ Regen eingetragen: '+mm);
+}
+
+function delRegen(i){
+  regenLog.splice(i,1);
+  renderRegenLog();
+  renderRegenStats();
+  saveAll();
+  toast('🗑 Gelöscht');
+}
+
+function renderRegenLog(){
+  const el = document.getElementById('regenLogEl');
+  if(!el) return;
+  if(!regenLog.length){ el.innerHTML='📋 Keine Einträge'; return; }
+  el.innerHTML = '📋 Regenhistorie:<br>' +
+    regenLog.slice(0,10).map((e,i)=>
+      '<span style="display:flex;justify-content:space-between;align-items:center;margin-top:3px">'
+      +'<span>'+e.d+' · '+e.mm+' mm'+(e.notiz?' · '+e.notiz:'')+'</span>'
+      +'<button onclick="delRegen('+i+')" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:0 2px">×</button>'
+      +'</span>'
+    ).join('')
+    +(regenLog.length>10?'<div style="font-size:11px;color:var(--muted);margin-top:4px">+'+(regenLog.length-10)+' ältere Einträge im Journal</div>':'');
+}
+
+function renderRegenStats(){
+  const today = nowStr();
+  const todayParts = today.split('.');
+  const todayMo = todayParts[1], todayYr = todayParts[2];
+  // Kalenderwoche berechnen
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+
+  let heute=0, woche=0, monat=0, jahr=0, letzt='–';
+  regenLog.forEach(e=>{
+    const p = e.d.split('.');
+    if(p.length<3) return;
+    const dd=parseInt(p[0]),mm=parseInt(p[1]),yy=parseInt(p[2]);
+    const eDate = new Date(yy, mm-1, dd);
+    const mmF = e.mm || 0;
+    if(yy == parseInt(todayYr)){
+      jahr += mmF;
+      if(mm == parseInt(todayMo)) monat += mmF;
+      if(eDate >= startOfWeek) woche += mmF;
+      if(e.d === today) heute += mmF;
+    }
+    if(letzt==='–') letzt = e.d+' ('+mmF+' mm)';
+  });
+
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('regenHeute', heute.toFixed(1));
+  set('regenWoche', woche.toFixed(1));
+  set('regenMonat', monat.toFixed(1));
+  set('regenJahr',  jahr.toFixed(1)+' mm');
+  set('regenLetzt', letzt);
+}
+
+function initRegenDatum(){
+  const el = document.getElementById('regenDatum');
+  if(!el) return;
+  const n=new Date();
+  el.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+}
+
 function togAuto(){const on=document.getElementById('autoT').checked;document.getElementById('naxt').textContent=on?'Morgen 07:00':'Manuell';toast(on?'💧 Automatik ein':'🔴 Automatik aus');}
 function chFr(d){frI=Math.max(0,Math.min(frO.length-1,frI+d));document.getElementById('frV').textContent=frO[frI];}
 function chDa(d){daI=Math.max(0,Math.min(daO.length-1,daI+d));document.getElementById('daV').textContent=daO[daI];}
@@ -1811,6 +1969,7 @@ const STORE_KEYS={
   wasser:    'tf_wasserLog',
   tbEntries: 'tf_tbEntries',
   kalRead:   'tf_kalRead',
+  regen:     'tf_regenLog',
 };
 
 function storeSave(key, data){
@@ -1832,6 +1991,7 @@ function saveAll(){
   storeSave(STORE_KEYS.wasser,    wasserLog);
   storeSave(STORE_KEYS.tbEntries, tbEntries);
   storeSave(STORE_KEYS.kalRead,   kalRead);
+  storeSave(STORE_KEYS.regen,     regenLog);
 }
 
 function loadAll(){
@@ -1846,6 +2006,7 @@ function loadAll(){
   wasserLog  = storeLoad(STORE_KEYS.wasser,    []);
   tbEntries  = storeLoad(STORE_KEYS.tbEntries, []);
   kalRead    = storeLoad(STORE_KEYS.kalRead,   {});
+  regenLog   = storeLoad(STORE_KEYS.regen,    []);
 }
 
 // Automatisch speichern nach jeder Aktion – hook in alle Eintrag-Funktionen
