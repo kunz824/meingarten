@@ -210,11 +210,17 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <div class="ml" id="mLabel"></div>
     <button onclick="chM(1)">&#8250;</button>
   </div>
+  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">Gemüse-Filter</div>
+  <div class="frow" id="kalGemueseRow"></div>
   <div id="kalList"></div>
 </div>
 
 <!-- TAB JOURNAL -->
 <div class="screen" id="screen-tagebuch">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:600;color:var(--gd)">📓 Gartenjournal 2026</div>
+    <button onclick="exportJournal()" style="background:var(--gd);color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export</button>
+  </div>
   <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">Kategorie</div>
   <div class="frow" id="jKatRow"></div>
   <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:10px 0 6px">Beet</div>
@@ -281,6 +287,10 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <!-- Vorschlagsbox – dynamisch befüllt -->
     <div id="pflVorschlag" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid var(--gl);border-radius:10px;padding:12px;font-size:13px;line-height:1.6">
     </div>
+    <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px;margin-top:8px">
+      <div class="prl">📝 Notiz</div>
+      <textarea class="ni" id="pflNotiz" rows="2" placeholder="z.B. Sorte, Herkunft, Besonderheiten…"></textarea>
+    </div>
     <button class="sbtn" style="margin-top:10px" onclick="pflanzEintr()">✅ Pflanzung eintragen</button>
     <div class="dlog" id="pflLogEl"></div>
   </div>
@@ -288,8 +298,35 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <!-- 2. DÜNGERGABEN -->
   <div class="pt">🌿 Düngergaben</div>
   <div class="pc">
+    <div class="pr"><div class="prl">🥬 Kultur</div>
+      <select id="dKultur" onchange="autoSetDBeet()" style="max-width:180px">
+        <option value="">– Kultur –</option>
+        <optgroup label="Fruchtfolge-Beete">
+          <option>Kartoffeln</option><option>Zwiebeln</option><option>Karotten</option>
+          <option>Auberginen</option><option>Buschbohnen</option><option>Kohlrabi</option>
+          <option>Blaukabis</option><option>Lauch</option><option>Fenchel</option>
+          <option>Krautstiel</option><option>Schwarzwurzeln</option>
+        </optgroup>
+        <optgroup label="Fixbeete">
+          <option>Mais</option><option>Zucchetti</option><option>Kürbis</option>
+          <option>Tomaten</option><option>Pepperoni</option><option>Paprika</option>
+          <option>Gurken</option><option>Kopfsalat</option><option>Feldsalat</option>
+        </optgroup>
+        <optgroup label="Vor-/Folgekulturen">
+          <option>Knoblauch</option><option>Winterlauch</option><option>Spinat</option>
+          <option>Nüssler</option><option>Endivien</option><option>Zuckerhut</option>
+          <option>Frühlingszwiebeln</option><option>Radieschen</option>
+        </optgroup>
+      </select></div>
     <div class="pr"><div class="prl">🧪 Düngertyp</div>
-      <select id="dTyp"><option>Universaldünger</option><option>Kompost</option><option>Hornspäne</option></select></div>
+      <select id="dTyp">
+        <option value="Universaldünger">Universaldünger (GROW by OBI BIO, NK 3.4/6.8)</option>
+        <option value="Hornspäne">Hornspäne (Hauert Biorga, NPK 12/0/0)</option>
+        <option value="Hühnermist">Hühnermist (Geistlich, NPKM 2.5/2.8/2.1/0.4)</option>
+        <option value="Kompost">Kompost fest (Bio Capito, NPK 0.5/0.3/0.5)</option>
+        <option value="Brennesseljauche">Brennesseljauche (Gesal Extrakt)</option>
+        <option value="Kuhmist">Kuhmist (kompostiert)</option>
+      </select></div>
     <div class="pr"><div class="prl">📍 Beet</div>
       <select id="dBeet">
         <option>Alle Beete</option><option>Beete 1-3</option><option>Beete 4-7 (Kartoffeln)</option>
@@ -300,6 +337,10 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       </select></div>
     <div class="pr"><div class="prl">📅 Intervall</div>
       <div class="step"><button onclick="chDI(-1)">−</button><span id="dIV">alle 14 Tage</span><button onclick="chDI(1)">+</button></div></div>
+    <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div class="prl">📝 Notiz</div>
+      <textarea class="ni" id="dNotiz" rows="2" placeholder="z.B. Menge, Beobachtung…"></textarea>
+    </div>
     <button class="sbtn" onclick="duengeEintr()">✅ Düngergabe eintragen</button>
     <div class="dlog" id="dLogEl"></div>
   </div>
@@ -307,6 +348,26 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <!-- 3. PFLANZENSCHUTZ -->
   <div class="pt">🐛 Pflanzenschutz</div>
   <div class="pc">
+    <div class="pr"><div class="prl">🥬 Kultur</div>
+      <select id="schutzKultur" onchange="autoSetSchutzBeet()" style="max-width:180px">
+        <option value="">– Kultur –</option>
+        <optgroup label="Fruchtfolge-Beete">
+          <option>Kartoffeln</option><option>Zwiebeln</option><option>Karotten</option>
+          <option>Auberginen</option><option>Buschbohnen</option><option>Kohlrabi</option>
+          <option>Blaukabis</option><option>Lauch</option><option>Fenchel</option>
+          <option>Krautstiel</option><option>Schwarzwurzeln</option>
+        </optgroup>
+        <optgroup label="Fixbeete">
+          <option>Mais</option><option>Zucchetti</option><option>Kürbis</option>
+          <option>Tomaten</option><option>Pepperoni</option><option>Paprika</option>
+          <option>Gurken</option><option>Kopfsalat</option><option>Feldsalat</option>
+        </optgroup>
+        <optgroup label="Vor-/Folgekulturen">
+          <option>Knoblauch</option><option>Winterlauch</option><option>Spinat</option>
+          <option>Nüssler</option><option>Endivien</option><option>Zuckerhut</option>
+          <option>Frühlingszwiebeln</option><option>Radieschen</option>
+        </optgroup>
+      </select></div>
     <div class="pr"><div class="prl">🔬 Massnahme</div>
       <select id="schutzTyp"><option>Pilzbekämpfung</option><option>Schädlingsbekämpfung</option><option>Unkrautbekämpfung</option></select></div>
     <div class="pr"><div class="prl">📍 Beet</div>
@@ -318,7 +379,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
         <option>Beete 15-16 (Pepperoni/Gurken)</option><option>Beet 17 (Salat)</option>
       </select></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
-      <div class="prl">📝 Was konkret?</div>
+      <div class="prl">📝 Was konkret? (Notiz)</div>
       <textarea class="ni" id="schutzNotiz" rows="3" placeholder="z.B. Kupferspritzmittel gegen Mehltau, Schneckenkörner ausgelegt…"></textarea>
     </div>
     <button class="sbtn" onclick="schutzEintr()">✅ Massnahme eintragen</button>
@@ -328,6 +389,26 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <!-- 4. BEWÄSSERUNGS-JOURNAL -->
   <div class="pt">💦 Bewässerung</div>
   <div class="pc">
+    <div class="pr"><div class="prl">🥬 Kultur</div>
+      <select id="wasserKultur" onchange="autoSetWasserBeet()" style="max-width:180px">
+        <option value="">– Kultur –</option>
+        <optgroup label="Fruchtfolge-Beete">
+          <option>Kartoffeln</option><option>Zwiebeln</option><option>Karotten</option>
+          <option>Auberginen</option><option>Buschbohnen</option><option>Kohlrabi</option>
+          <option>Blaukabis</option><option>Lauch</option><option>Fenchel</option>
+          <option>Krautstiel</option><option>Schwarzwurzeln</option>
+        </optgroup>
+        <optgroup label="Fixbeete">
+          <option>Mais</option><option>Zucchetti</option><option>Kürbis</option>
+          <option>Tomaten</option><option>Pepperoni</option><option>Paprika</option>
+          <option>Gurken</option><option>Kopfsalat</option><option>Feldsalat</option>
+        </optgroup>
+        <optgroup label="Vor-/Folgekulturen">
+          <option>Knoblauch</option><option>Winterlauch</option><option>Spinat</option>
+          <option>Nüssler</option><option>Endivien</option><option>Zuckerhut</option>
+          <option>Frühlingszwiebeln</option><option>Radieschen</option>
+        </optgroup>
+      </select></div>
     <div class="pr"><div class="prl">📍 Beet</div>
       <select id="wasserBeet">
         <option>Alle Beete</option><option>Beete 1-3</option><option>Beete 4-7 (Kartoffeln)</option>
@@ -340,6 +421,10 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       <div class="step"><button onclick="chWL(-1)">−</button><span id="wasserVal">10 Liter</span><button onclick="chWL(1)">+</button></div></div>
     <div class="pr"><div class="prl">⏱ Dauer</div>
       <div class="step"><button onclick="chWM(-1)">−</button><span id="wasserMin">10 min</span><button onclick="chWM(1)">+</button></div></div>
+    <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div class="prl">📝 Notiz</div>
+      <textarea class="ni" id="wasserNotiz" rows="2" placeholder="z.B. nach Trockenheit, vor Hitze…"></textarea>
+    </div>
     <button class="sbtn" onclick="wasserEintr()">✅ Bewässerung eintragen</button>
     <div class="dlog" id="wasserLogEl"></div>
   </div>
@@ -348,6 +433,74 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
 
 <!-- TAB AUTOMATISIERUNG -->
 <div class="screen" id="screen-auto">
+
+  <!-- WASSERTANK FÜLLSTAND -->
+  <div class="pt">🪣 Wassertank</div>
+  <div class="pc">
+    <!-- Visuelle Tank-Anzeige -->
+    <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:14px">
+      <!-- Tank-Grafik -->
+      <div style="flex-shrink:0;width:56px">
+        <div style="width:56px;border:2.5px solid var(--gd);border-radius:4px 4px 6px 6px;overflow:hidden;height:90px;position:relative;background:#f0f9ff">
+          <div id="tankFill" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#0ea5e9,#7dd3fc);transition:height .6s;height:65%"></div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <span id="tankPct" style="font-size:14px;font-weight:800;color:var(--gd);z-index:1;text-shadow:0 0 4px #fff">65%</span>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:9px;color:var(--muted);margin-top:3px">Tank</div>
+      </div>
+      <!-- Kennzahlen -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--muted)">Füllstand</span>
+          <span id="tankLiter" style="font-size:18px;font-weight:700;color:var(--gd)">325 L</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--muted)">Tank-Kapazität</span>
+          <span id="tankKapLabel" style="font-size:14px;font-weight:600">500 L</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--muted)">Status</span>
+          <span id="tankStatus" style="font-size:13px;font-weight:600;color:#16a34a">✅ Ausreichend</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Füllstand manuell anpassen -->
+    <div class="pr"><div class="prl">💧 Aktueller Füllstand</div>
+      <div class="step">
+        <button onclick="chTank(-1)">−</button>
+        <span id="tankSlider" style="min-width:60px;text-align:center">325 L</span>
+        <button onclick="chTank(1)">+</button>
+      </div></div>
+    <div class="pr"><div class="prl">🪣 Tankgrösse</div>
+      <div class="step">
+        <button onclick="chTankKap(-1)">−</button>
+        <span id="tankKapVal" style="min-width:60px;text-align:center">500 L</span>
+        <button onclick="chTankKap(1)">+</button>
+      </div></div>
+    <div class="pr"><div class="prl">⚠️ Alarm-Grenze</div>
+      <div class="step">
+        <button onclick="chTankAlarm(-1)">−</button>
+        <span id="tankAlarmVal" style="min-width:60px;text-align:center">20%</span>
+        <button onclick="chTankAlarm(1)">+</button>
+      </div></div>
+    <div class="pr"><div class="prl">🔔 Tank-Alarm</div>
+      <label class="ts"><input type="checkbox" id="tankAlarmT" checked><span class="tsl"></span></label></div>
+    <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div class="prl">📅 Letzte Befüllung</div>
+      <div style="display:flex;gap:8px;align-items:center;width:100%;margin-top:4px">
+        <input type="date" id="tankBefuellung"
+          style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card);flex:1">
+        <button class="sbtn" style="margin:0;padding:8px 14px" onclick="saveTankBefuellung()">✔</button>
+      </div>
+      <div id="tankBefuellungLabel" style="font-size:12px;color:var(--muted)">Noch nicht eingetragen</div>
+    </div>
+    <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--gp);font-size:12px;color:var(--gd);line-height:1.6" id="tankHinweis">
+      💡 Tank befüllen: Regenwasser bevorzugt. Leitungswasser vor Einsatz 24h stehen lassen (Chlor entgast).
+    </div>
+  </div>
+
   <div class="pt">⚙️ Bewässerung Automatik</div>
   <div class="pc">
     <div class="pr"><div class="prl">🔄 Automatik ein/aus</div>
@@ -387,7 +540,151 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       <label class="ts"><input type="checkbox" id="notifE" checked><span class="tsl"></span></label></div>
     <div class="pr"><div class="prl">📅 Wochenzusammenfassung</div>
       <label class="ts"><input type="checkbox" id="notifS" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">🪣 Tank unter Alarmgrenze</div>
+      <label class="ts"><input type="checkbox" id="notifTank" checked><span class="tsl"></span></label></div>
   </div>
+</div>
+
+<!-- TAB HILFSMITTEL -->
+<div class="screen" id="screen-hilfsmittel">
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
+    Eingesetzte Produkte mit Nährstoffangaben. Empfehlungen im Kalender und Pflege-Tab basieren auf diesen Mitteln.
+  </p>
+
+  <!-- DÜNGER -->
+  <div class="sec-label" style="margin-top:0">🌿 Düngemittel</div>
+
+  <!-- Universal-Flüssigdünger -->
+  <div class="pc" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🌱</div>
+      <div><div style="font-weight:700;font-size:15px;color:var(--gd)">Universal-Flüssigdünger</div>
+      <div style="font-size:12px;color:var(--muted)">GROW by OBI BIO Garten- und Gemüsedünger</div></div>
+    </div>
+    <div id="hm-npk-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:#dbeafe;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1e40af">3.4</div><div style="font-size:10px;color:#1e40af;font-weight:600">N – Stickstoff</div></div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--gd)">–</div><div style="font-size:10px;color:var(--gd);font-weight:600">P – Phosphor</div></div>
+      <div style="background:#fef9c3;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#a16207">6.8</div><div style="font-size:10px;color:#a16207;font-weight:600">K – Kalium</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">
+      <b>Wirkung:</b> Schnell verfügbar (flüssig). Kaliumreich → fördert Fruchtbildung und Qualität.<br>
+      <b>Anwendung:</b> Verdünnt giessen, alle 14 Tage.<br>
+      <b>Ideal für:</b> Tomaten, Gurken, Pepperoni, Zucchetti, Kürbis, Mais.
+    </div>
+    <div style="background:#f0fdf4;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gd)">💧 Dosierung: 20 ml / 10 L Wasser → 1 L/Pflanze oder 2 L/m²</div>
+  </div>
+
+  <!-- Hornspäne -->
+  <div class="pc" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;background:#fef3c7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🦴</div>
+      <div><div style="font-weight:700;font-size:15px;color:var(--gd)">Hornspäne</div>
+      <div style="font-size:12px;color:var(--muted)">Hauert Biorga Hornspäne</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:#dbeafe;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1e40af">12</div><div style="font-size:10px;color:#1e40af;font-weight:600">N – Stickstoff</div></div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--gd)">0</div><div style="font-size:10px;color:var(--gd);font-weight:600">P – Phosphor</div></div>
+      <div style="background:#fef9c3;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#a16207">0</div><div style="font-size:10px;color:#a16207;font-weight:600">K – Kalium</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">
+      <b>Wirkung:</b> Langsam verfügbar (organisch). Reiner Stickstoffdünger. Wirkungsbeginn nach 4–6 Wochen.<br>
+      <b>Anwendung:</b> Einarbeiten, vor der Pflanzung oder Herbst für Frühjahreswirkung.<br>
+      <b>Ideal für:</b> Kohl-Gruppe, Lauch, Auberginen, Fenchel; Herbst: alle Fruchtfolge-Beete.
+    </div>
+    <div style="background:#fef3c7;border-radius:8px;padding:8px 12px;font-size:12px;color:#92400e">🦴 Dosierung: 80–100 g/m² einarbeiten. Nicht mehr als 150 g/m² – verbrennt Wurzeln!</div>
+  </div>
+
+  <!-- Hühnermist -->
+  <div class="pc" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;background:#ffedd5;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐔</div>
+      <div><div style="font-weight:700;font-size:15px;color:var(--gd)">Hühnermist (pelletiert)</div>
+      <div style="font-size:12px;color:var(--muted)">Geistlich Hühnermist</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+      <div style="background:#dbeafe;border-radius:10px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:800;color:#1e40af">2.5</div><div style="font-size:9px;color:#1e40af;font-weight:600">N</div></div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--gd)">2.8</div><div style="font-size:9px;color:var(--gd);font-weight:600">P</div></div>
+      <div style="background:#fef9c3;border-radius:10px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:800;color:#a16207">2.1</div><div style="font-size:9px;color:#a16207;font-weight:600">K</div></div>
+      <div style="background:#f3e8ff;border-radius:10px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:800;color:#7c3aed">0.4</div><div style="font-size:9px;color:#7c3aed;font-weight:600">Mg</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">
+      <b>Wirkung:</b> Ausgewogen (N-P-K). Pelletiert = geruchsarm, dosierbar. Mittelschnell verfügbar.<br>
+      <b>Anwendung:</b> 2–3 Wochen vor Pflanzung einarbeiten.<br>
+      <b>Ideal für:</b> Mais, Zucchetti, Kürbis, Kabis, Lauch, Knoblauch, Tomaten.
+    </div>
+    <div style="background:#ffedd5;border-radius:8px;padding:8px 12px;font-size:12px;color:#7c3000">🐔 Dosierung: 80–150 g/m². Niemals frisch – nur pelletiert verwenden!</div>
+  </div>
+
+  <!-- Kompost fest -->
+  <div class="pc" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;background:#e8f5ed;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">♻️</div>
+      <div><div style="font-weight:700;font-size:15px;color:var(--gd)">Kompost fest</div>
+      <div style="font-size:12px;color:var(--muted)">Gartenkompost Bio Capito</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:#dbeafe;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1e40af">0.5</div><div style="font-size:10px;color:#1e40af;font-weight:600">N – Stickstoff</div></div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--gd)">0.3</div><div style="font-size:10px;color:var(--gd);font-weight:600">P – Phosphor</div></div>
+      <div style="background:#fef9c3;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#a16207">0.5</div><div style="font-size:10px;color:#a16207;font-weight:600">K – Kalium</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">
+      <b>Wirkung:</b> Bodenverbesserer, langsam verfügbar. Verbessert Bodenstruktur und Wasserhaltefähigkeit.<br>
+      <b>Anwendung:</b> Grosszügig ausbringen und einarbeiten. Ideal im Herbst/Winter oder vor Pflanzung.<br>
+      <b>Ideal für:</b> Starkzehrer (Zucchetti, Kürbis, Mais), Bodenaufbau nach Ernte, Winterkompostierung.
+    </div>
+    <div style="background:#e8f5ed;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gd)">♻️ Dosierung: 2–5 kg/m² ausbringen. Kein Überdosierungsrisiko.</div>
+  </div>
+
+  <!-- PFLANZENSCHUTZ -->
+  <div class="sec-label">🐛 Pflanzenschutzmittel</div>
+
+  <!-- Brennessel-Extrakt -->
+  <div class="pc" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🌿</div>
+      <div><div style="font-weight:700;font-size:15px;color:var(--gd)">Brennessel-Extrakt</div>
+      <div style="font-size:12px;color:var(--muted)">Gesal Brennnessel-Extrakt</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:#dcfce7;border-radius:10px;padding:8px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--gd)">🐛 Schädlinge</div><div style="font-size:11px;color:var(--gd)">Blattläuse, Milben, Rüsselkäfer</div></div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:8px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--gd)">🍄 Pilze</div><div style="font-size:11px;color:var(--gd)">Vorbeugend gegen Mehltau</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">
+      <b>Doppelwirkung:</b> Als Dünger (N-reich) UND Pflanzenstärkung gegen Schädlinge und Pilzkrankheiten.<br>
+      <b>Anwendung Dünger:</b> 1:10 verdünnt giessen, 1–2 L/Pflanze alle 2–3 Wochen.<br>
+      <b>Anwendung Pflanzenschutz:</b> 1:20 verdünnt, abends spritzen auf Blätter (Ober- und Unterseite).<br>
+      <b>Ideal gegen:</b> Blattläuse (Bohnen, Lauch), Mehltau (Zucchetti), Pilzdruck (Tomaten).
+    </div>
+    <div style="background:#f0fdf4;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gd)">🌿 Düngen: 1:10 / 1–2 L pro Pflanze &nbsp;·&nbsp; Schutz: 1:20 / auf Blätter spritzen, abends</div>
+  </div>
+
+  <!-- Anwendungsübersicht -->
+  <div class="sec-label">📋 Anwendungsübersicht</div>
+  <div class="pc">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:400px">
+        <tr style="background:var(--gd);color:#fff">
+          <th style="padding:8px 10px;text-align:left;border-radius:8px 0 0 0">Kultur</th>
+          <th style="padding:8px 10px;text-align:center">Universaldünger</th>
+          <th style="padding:8px 10px;text-align:center">Hornspäne</th>
+          <th style="padding:8px 10px;text-align:center">Hühnermist</th>
+          <th style="padding:8px 10px;text-align:center">Kompost</th>
+          <th style="padding:8px 10px;text-align:center;border-radius:0 8px 0 0">Brennessel</th>
+        </tr>
+        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Tomaten</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td></tr>
+        <tr><td style="padding:7px 10px;font-weight:600">Zucchetti/Kürbis</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td></tr>
+        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Mais</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td></tr>
+        <tr><td style="padding:7px 10px;font-weight:600">Kartoffeln</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
+        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Kabis/Lauch</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td></tr>
+        <tr><td style="padding:7px 10px;font-weight:600">Auberginen</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td></tr>
+        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Kopfsalat</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
+        <tr><td style="padding:7px 10px;font-weight:600">Knoblauch</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">✅✅ = ideal / ✅ = geeignet / – = nicht empfohlen</div>
+  </div>
+
 </div>
 
 <!-- TAB FRUCHTFOLGE -->
@@ -413,6 +710,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <div class="tab" onclick="showTab('kalender',this)"><div class="tab-icon">📅</div><div class="tab-label">Kalender</div></div>
   <div class="tab" onclick="showTab('tagebuch',this)"><div class="tab-icon">📓</div><div class="tab-label">Journal</div></div>
   <div class="tab" onclick="showTab('pflege',this)"><div class="tab-icon">💧</div><div class="tab-label">Pflege</div></div>
+  <div class="tab" onclick="showTab('hilfsmittel',this)"><div class="tab-icon">🧪</div><div class="tab-label">Hilfsmittel</div></div>
   <div class="tab" onclick="showTab('fruchtfolge',this)"><div class="tab-icon">🔄</div><div class="tab-label">Fruchtfolge</div></div>
   <div class="tab" onclick="showTab('bibliothek',this)"><div class="tab-icon">📚</div><div class="tab-label">Bibliothek</div></div>
   <div class="tab" onclick="showTab('auto',this)"><div class="tab-icon">⚙️</div><div class="tab-label">Automatik</div></div>
@@ -468,469 +766,143 @@ function getBD(b,o){const ff=getFF(b,o);return{k:ffNames[ff],folge:ff,vor:ffVor[
 // b       = Beet-Bezug
 const kal={
   1:[
-    {t:"pflanzen",  i:"🌱",kat:"Pflanzen",     h:"Anzucht starten – Tomaten, Auberginen, Pepperoni",     d:"Innen bei 20°C anzüchten. Keimzeit 10–14 Tage. Helles Fensterbrett oder Anzuchtlampe.",           b:"Beet 14, 15/16, 10"},
-    {t:"pflanzen",  i:"🌱",kat:"Pflanzen",     h:"Kopfsalat Anzucht",                                    d:"Erste Kopfsalat-Aussaat innen. Keimtemperatur 10–15°C – kühler als Tomaten.",                    b:"Beet 17"},
-    {t:"pflanzen",  i:"🌱",kat:"Pflanzen",     h:"Spinat säen (Vorkultur)",                              d:"Sobald Boden nicht mehr gefroren: Direktsaat Spinat als Vorkultur. Frosthart bis –8°C.",         b:"Beete 6,7,11"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Hornspäne Vorrat prüfen",                              d:"Hornspäne für Frühjahrsanwendung bereitstellen. Wirkungsbeginn nach 4–6 Wochen im Boden.",       b:"Alle Beete"},
-    {t:"pflege",    i:"🛠", kat:"Pflege",       h:"Winterschutz kontrollieren",                           d:"Mulch auf Beeten kontrollieren. Feldsalat und Winterlauch auf Frost-/Schneeschäden prüfen.",     b:"Beet 17, Beete 15/16"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung minimal",                                  d:"Im Januar kaum Wasserbedarf. Nur bei längerem Frost und Sonneneinstrahlung gelegentlich giessen.", b:"Alle Beete"},
+    {t:"pflanzen",  g:"Tomaten",        i:"🌱",kat:"Pflanzen",      h:"Tomaten: Anzucht starten",               d:"Innen bei 20°C, helles Fensterbrett. Keimzeit 10–14 Tage.",                                        b:"Anzucht innen"},
+    {t:"pflanzen",  g:"Auberginen",     i:"🌱",kat:"Pflanzen",      h:"Auberginen: Anzucht starten",            d:"Innen bei 20–22°C. Braucht länger als Tomaten – jetzt beginnen!",                                  b:"Anzucht innen"},
+    {t:"pflanzen",  g:"Pepperoni",      i:"🌱",kat:"Pflanzen",      h:"Pepperoni/Paprika: Anzucht",             d:"Innen bei 22°C. Langsamste Keimung – frühzeitig starten.",                                         b:"Anzucht innen"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Alle Beete: Kompost ausbringen",         d:"Produkt: Bio Capito Kompost (NPK 0.5/0.3/0.5). Menge: 3–5kg/m² auf leere Beete einarbeiten. Bodenverbesserung für Frühjahr.", b:"Beete 4–13"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Alle Beete: Hornspäne Vorrat prüfen",    d:"Produkt: Hauert Biorga Hornspäne (NPK 12/0/0). Bedarf: 80–100g/m² × Beetfläche. Jetzt bestellen.", b:"Alle Beete"},
+    {t:"pflege",    i:"🛠",kat:"Pflege",g:"Alle",                   h:"Winterschutz kontrollieren",             d:"Mulch auf Beeten prüfen. Feldsalat und Winterlauch auf Frostschäden kontrollieren.",               b:"Beet 17, 15/16"},
   ],
   2:[
-    {t:"pflanzen",  i:"🥔",kat:"Pflanzen",     h:"Kartoffeln stecken",                                   d:"Frühkartoffeln stecken sobald Boden bearbeitbar. 2 Reihen, 30 cm Abstand, 10 cm in Reihe, 8 cm tief.", b:"Beete 4–7"},
-    {t:"pflanzen",  i:"🧅",kat:"Pflanzen",     h:"Frühlingszwiebeln stecken (Vorkultur)",                d:"Vorkultur vor Zwiebeln & Karotten. Stecken sobald Boden frostfrei.",                             b:"Beete 8,9"},
-    {t:"pflanzen",  i:"🌿",kat:"Pflanzen",     h:"Radieschen säen (Vorkultur)",                          d:"Schnellste Vorkultur für Fenchel/Krautstiel. 5 Reihen, 15 cm Abstand.",                         b:"Beete 12,13"},
-    {t:"pflanzen",  i:"🌿",kat:"Pflanzen",     h:"Lauch-Anzucht innen",                                  d:"Lauch benötigt lange Anzuchtzeit. Jetzt innen in Saatschalen aussäen.",                          b:"Beet 11"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Universaldünger beim Kartoffelstecken",                d:"Beim Stecken direkt Universaldünger einarbeiten. Kartoffeln sind Starkzehrer.",                   b:"Beete 4–7"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Drahtschnecken kontrollieren",                        d:"Beim Bodenbearbeiten auf Drahtschnecken und Engerlinge achten – Frassschäden an Kartoffeln.",     b:"Beete 4–7"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung nach Stecken",                             d:"Nach dem Stecken einmal gut angiessen. Danach erst wieder wenn Boden 5 cm tief trocken.",         b:"Beete 4–7"},
+    {t:"pflanzen",  g:"Kartoffeln",     i:"🥔",kat:"Pflanzen",      h:"Kartoffeln: stecken",                    d:"Methode: Setzen/Stecken. 2 Reihen, 30cm Abstand, 10cm in Reihe, 8cm tief.",                        b:"Beete 4–7"},
+    {t:"pflanzen",  g:"Frühlingszwiebeln",i:"🌱",kat:"Pflanzen",    h:"Frühlingszwiebeln: stecken (Vorkultur)", d:"Vorkultur vor Zwiebeln & Karotten. Sobald Boden frostfrei.",                                       b:"Beete 8,9"},
+    {t:"duenger",   g:"Kartoffeln",     i:"🌿",kat:"Düngung",       h:"Kartoffeln: Universaldünger beim Stecken", d:"Produkt: GROW by OBI BIO UF (NK 3.4/6.8). Menge: 80–100g/m² in Furche einarbeiten. Starkzehrer!", b:"Beete 4–7"},
+    {t:"duenger",   g:"Mais",           i:"🌿",kat:"Düngung",       h:"Mais/Zucchetti/Kürbis: Hühnermist einarbeiten", d:"Produkt: Geistlich Hühnermist (NPKM 2.5/2.8/2.1). Menge: 100–150g/m², 3 Wo. vor Pflanzung.", b:"Beete 1–3"},
+    {t:"schutz",    g:"Kartoffeln",     i:"🐛",kat:"Pflanzenschutz",h:"Kartoffeln: Drahtschnecken kontrollieren", d:"Beim Bodenbearbeiten auf Engerlinge achten. Befallene Stellen mit Nematoden behandeln.",          b:"Beete 4–7"},
+    {t:"bewaessern",g:"Kartoffeln",     i:"💧",kat:"Bewässerung",   h:"Kartoffeln: nach Stecken angiessen",     d:"Einmal gut angiessen. Dann erst wenn Boden 5cm tief trocken.",                                     b:"Beete 4–7"},
   ],
   3:[
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Kopfsalat pflanzen (1. Satz)",                         d:"Erste Jungpflanzen ins Beet. 3 Reihen, 25 cm Abstand. Gestaffelt alle 3 Wochen neu.",             b:"Beet 17"},
-    {t:"pflanzen",  i:"🥕",kat:"Pflanzen",     h:"Karotten säen",                                        d:"Direktsaat Karotten. 2 Reihen, 20 cm Abstand, 2 cm tief. Gestaffelt April/Mai/Juni wiederholen.", b:"Beete 8,9"},
-    {t:"pflanzen",  i:"🌱",kat:"Pflanzen",     h:"Spinat ernten / Beet räumen",                          d:"Vorkultur-Spinat ernten und Beet für Hauptkultur freimachen.",                                   b:"Beete 6,7,11"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Universaldünger Kopfsalat",                            d:"Bei Pflanzung Universaldünger einarbeiten – sparsam, Salat ist Schwachzehrer.",                   b:"Beet 17"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Schneckenschutz aufbauen",                             d:"Mit steigenden Temperaturen Schneckenaktivität beobachten. Schneckenkörner bereitlegen.",        b:"Beet 17, Beete 6,7"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Regelmässig giessen beginnen",                         d:"Ab März regelmässig giessen sobald Tagestemperaturen über 10°C. Morgens giessen bevorzugt.",      b:"Beet 17, Beete 8,9"},
+    {t:"pflanzen",  g:"Kopfsalat",      i:"🥬",kat:"Pflanzen",      h:"Kopfsalat: 1. Satz pflanzen",            d:"Methode: Jungpflanzen setzen. 3 Reihen, 25cm Abstand. Alle 3 Wochen neuen Satz pflanzen.",          b:"Beet 17"},
+    {t:"pflanzen",  g:"Karotten",       i:"🥕",kat:"Pflanzen",      h:"Karotten: 1. Saat",                      d:"Methode: Säen. 2 Reihen, 20cm Abstand, 2cm tief. Gestaffelt April/Mai/Juni wiederholen.",           b:"Beete 8,9"},
+    {t:"pflanzen",  g:"Spinat",         i:"🌱",kat:"Pflanzen",      h:"Spinat: Vorkultur säen",                  d:"Methode: Säen. Frosthart bis –8°C. Schnellste Vorkultur vor Kohlrabi/Kabis.",                      b:"Beete 6,7,11"},
+    {t:"duenger",   g:"Kopfsalat",      i:"🌿",kat:"Düngung",       h:"Kopfsalat: Universaldünger bei Pflanzung", d:"Produkt: GROW by OBI BIO UF. Menge: 30–40g/m² einarbeiten. SPARSAM – Salat ist Schwachzehrer!",  b:"Beet 17"},
+    {t:"duenger",   g:"Kohlrabi",       i:"🌿",kat:"Düngung",       h:"Kohlrabi/Kabis/Lauch: Hornspäne vorbereiten", d:"Produkt: Hauert Biorga Hornspäne. Menge: 80g/m² März einarbeiten. Wirkung ab Mai/Juni.",      b:"Beet 11"},
+    {t:"schutz",    g:"Kopfsalat",      i:"🐛",kat:"Pflanzenschutz",h:"Kopfsalat: Schneckenschutz aufbauen",    d:"Jungpflanzen sehr gefährdet! Schneckenkörner auslegen.",                                           b:"Beet 17"},
+    {t:"bewaessern",g:"Kopfsalat",      i:"💧",kat:"Bewässerung",   h:"Kopfsalat: regelmässig giessen",         d:"Ab 10°C giessen. Morgens bevorzugt. Feucht halten – Trockenheit fördert Schossen.",                b:"Beet 17"},
   ],
   4:[
-    {t:"pflanzen",  i:"🧅",kat:"Pflanzen",     h:"Zwiebeln stecken",                                     d:"Steckzwiebeln setzen. 2 Reihen, 40 cm Abstand, 8 cm in Reihe, 3–4 cm tief, Spitze nach oben.",   b:"Beete 8,9"},
-    {t:"pflanzen",  i:"🥦",kat:"Pflanzen",     h:"Kohlrabi pflanzen (1. Satz)",                          d:"Erste Kohlrabi-Jungpflanzen. 1 Reihe, 30 cm Abstand. Alle 3 Wochen neuen Satz pflanzen.",        b:"Beet 11"},
-    {t:"pflanzen",  i:"🌑",kat:"Pflanzen",     h:"Schwarzwurzeln säen",                                  d:"Frisches Saatgut zwingend! Direktsaat, 3 Reihen, 30 cm Abstand, 2 cm tief.",                     b:"Beet 13"},
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Kopfsalat (2. Satz)",                                  d:"Zweiten Satz Kopfsalat pflanzen für lückenlose Ernte.",                                          b:"Beet 17"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Hornspäne einarbeiten",                                d:"Hornspäne für Langzeitwirkung in Beete 10–12 einarbeiten. Wirkung ab Juni.",                      b:"Beete 10,11,12"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Universaldünger Zwiebeln",                             d:"Beim Stecken Universaldünger einarbeiten. Zwiebeln sind Mittelzehrer.",                          b:"Beete 8,9"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Kohlweissling beobachten",                             d:"Ab April Kohlweissling aktiv. Schmetterling beobachten, Eier unter Blättern absuchen.",          b:"Beet 11"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Zwiebelblattlaus kontrollieren",                       d:"Blattläuse auf Zwiebeln/Lauch beobachten. Bei Befall: Brennnesseljauche oder Seifenlauge.",      b:"Beete 8,9"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Zwiebeln & Karotten giessen",                          d:"Nach Stecken/Säen gut angiessen. Gleichmässige Feuchtigkeit fördert gleichmässige Keimung.",     b:"Beete 8,9"},
+    {t:"pflanzen",  g:"Zwiebeln",       i:"🧅",kat:"Pflanzen",      h:"Zwiebeln: stecken",                      d:"Methode: Setzen/Stecken. 2 Reihen, 40cm Abstand, 8cm in Reihe, 3–4cm tief, Spitze nach oben.",     b:"Beete 8,9"},
+    {t:"pflanzen",  g:"Kohlrabi",       i:"🥦",kat:"Pflanzen",      h:"Kohlrabi: 1. Satz pflanzen",             d:"Methode: Jungpflanzen setzen. 1 Reihe, 30cm Abstand. Alle 3 Wochen nachlegen.",                    b:"Beet 11"},
+    {t:"pflanzen",  g:"Schwarzwurzeln", i:"🌑",kat:"Pflanzen",      h:"Schwarzwurzeln: säen",                   d:"Methode: Säen. FRISCHES Saatgut zwingend! 3 Reihen, 30cm Abstand, 2cm tief.",                      b:"Beet 13"},
+    {t:"pflanzen",  g:"Kopfsalat",      i:"🥬",kat:"Pflanzen",      h:"Kopfsalat: 2. Satz pflanzen",            d:"Methode: Jungpflanzen setzen. Gestaffelt alle 3 Wochen für laufende Ernte.",                       b:"Beet 17"},
+    {t:"duenger",   g:"Zwiebeln",       i:"🌿",kat:"Düngung",       h:"Zwiebeln: Universaldünger beim Stecken", d:"Produkt: GROW by OBI BIO UF. Menge: 60–80g/m² einarbeiten. Mittelzehrer – nicht überdüngen!",      b:"Beete 8,9"},
+    {t:"duenger",   g:"Fenchel",        i:"🌿",kat:"Düngung",       h:"Fenchel/Krautstiel: Hornspäne vorarbeiten", d:"Produkt: Hauert Biorga Hornspäne. Menge: 80–100g/m², 3–4 Wochen vor Pflanzung einarbeiten.",   b:"Beet 12"},
+    {t:"duenger",   g:"Blaukabis",      i:"🌿",kat:"Düngung",       h:"Blaukabis/Lauch/Kohlrabi: Hühnermist",   d:"Produkt: Geistlich Hühnermist. Menge: 80–100g/m², 2 Wochen vor Pflanzung. Nur pelletiert!",       b:"Beet 11"},
+    {t:"schutz",    g:"Kohlrabi",       i:"🐛",kat:"Pflanzenschutz",h:"Kohlrabi/Kabis: Kohlweissling beobachten", d:"Ab April aktiv. Eier unter Blättern absuchen. Netz als Vorbeugung spannen.",                    b:"Beet 11"},
+    {t:"schutz",    g:"Zwiebeln",       i:"🐛",kat:"Pflanzenschutz",h:"Zwiebeln: Blattläuse bekämpfen",         d:"Produkt: Gesal Brennessel-Extrakt 1:20 abends auf Blätter spritzen. Alternativ Seifenlauge.",      b:"Beete 8,9"},
+    {t:"bewaessern",g:"Zwiebeln",       i:"💧",kat:"Bewässerung",   h:"Zwiebeln/Karotten: nach Stecken/Säen",  d:"Gleichmässige Feuchtigkeit für gleichmässige Keimung. Dann moderat weitergiessen.",                b:"Beete 8,9"},
   ],
   5:[
-    {t:"pflanzen",  i:"🌽",kat:"Pflanzen",     h:"Mais säen",                                            d:"Ab Mitte Mai. In Blöcken 3×3, 30 cm Abstand – Windbestäubung! Nicht in Reihen.",                 b:"Beete 1–3"},
-    {t:"pflanzen",  i:"🥒",kat:"Pflanzen",     h:"Zucchetti & Kürbis pflanzen",                          d:"Nach letztem Frost. Je 2 Pflanzen pro Beet. Boden vorher mit Kompost anreichern.",               b:"Beete 1–3"},
-    {t:"pflanzen",  i:"🍅",kat:"Pflanzen",     h:"Tomaten pflanzen",                                     d:"Nach Eisheiligen (15. Mai). 6 Jungpflanzen, Stäbe sofort setzen. Tief pflanzen.",                b:"Beet 14"},
-    {t:"pflanzen",  i:"🌶",kat:"Pflanzen",     h:"Pepperoni / Paprika / Gurken pflanzen",                d:"Nach letztem Frost. Warmen, windgeschützten Standort wählen.",                                   b:"Beete 15,16"},
-    {t:"pflanzen",  i:"🍆",kat:"Pflanzen",     h:"Auberginen pflanzen",                                  d:"Ende Mai an wärmsten Standort im Garten. Windschutz wichtig.",                                   b:"Beet 10"},
-    {t:"pflanzen",  i:"🫘",kat:"Pflanzen",     h:"Buschbohnen säen",                                     d:"Ab Mitte Mai. 2 Reihen, 30 cm Abstand, 4 cm tief. Nicht vor 12°C Bodentemperatur.",             b:"Beet 10"},
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Blaukabis, Lauch, Fenchel, Krautstiel pflanzen",       d:"Restliche Frühjahrs-Pflanzungen abschliessen. Abstand einhalten.",                              b:"Beet 11, 12"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Universaldünger bei Neupflanzungen",                   d:"Bei allen Neupflanzungen Universaldünger einarbeiten. Starkzehrer (Mais, Kürbis, Tomaten) grosszügiger düngen.", b:"Beete 1–3, 14, 15/16"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Kompost für Starkzehrer",                              d:"Zucchetti, Kürbis und Mais sind extreme Starkzehrer – Kompost vor Pflanzung einarbeiten.",       b:"Beete 1–3"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Schneckenschutz intensivieren",                        d:"Jungpflanzen sind sehr gefährdet. Schneckenkörner, Kupferband oder Bierfallen einsetzen.",       b:"Alle Jungpflanzen-Beete"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Spätfrost-Schutz bereithalten",                       d:"Bis 15. Mai Frostschutz (Vlies) für Jungpflanzen bereithalten.",                                 b:"Alle"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Regelmässig angiessen nach Pflanzung",                 d:"Neupflanzungen täglich giessen bis eingewurzelt (ca. 1–2 Wochen). Danach 2–3x pro Woche.",       b:"Alle Neupflanzungen"},
+    {t:"pflanzen",  g:"Mais",           i:"🌽",kat:"Pflanzen",      h:"Mais: säen (ab 15. Mai)",                d:"Methode: Säen. In Blöcken 3×3, 30cm Abstand. Windbestäubung – keine Reihen!",                      b:"Beete 1–3"},
+    {t:"pflanzen",  g:"Zucchetti",      i:"🥒",kat:"Pflanzen",      h:"Zucchetti/Kürbis: pflanzen",             d:"Methode: Jungpflanzen setzen. 2 Pflanzen/Beet. Nach letztem Frost. Kompost vorher einarbeiten.",   b:"Beete 1–3"},
+    {t:"pflanzen",  g:"Tomaten",        i:"🍅",kat:"Pflanzen",      h:"Tomaten: pflanzen (nach Eisheiligen)",   d:"Methode: Jungpflanzen setzen. 6 Pflanzen, Stäbe sofort setzen. Tief pflanzen.",                    b:"Beet 14"},
+    {t:"pflanzen",  g:"Pepperoni",      i:"🌶",kat:"Pflanzen",      h:"Pepperoni/Paprika/Gurken: pflanzen",     d:"Methode: Jungpflanzen setzen. Warmen, windgeschützten Standort wählen.",                           b:"Beete 15,16"},
+    {t:"pflanzen",  g:"Auberginen",     i:"🍆",kat:"Pflanzen",      h:"Auberginen: pflanzen",                   d:"Methode: Jungpflanzen setzen. Wärmsten Standort, Windschutz wichtig.",                             b:"Beet 10"},
+    {t:"pflanzen",  g:"Buschbohnen",    i:"🫘",kat:"Pflanzen",      h:"Buschbohnen: säen",                     d:"Methode: Säen. 2 Reihen, 30cm Abstand, 4cm tief. Nicht vor 12°C Bodentemperatur.",                  b:"Beet 10"},
+    {t:"pflanzen",  g:"Lauch",          i:"🌿",kat:"Pflanzen",      h:"Blaukabis/Lauch/Fenchel/Krautstiel",    d:"Methode: Jungpflanzen setzen. Abstände einhalten.",                                                b:"Beet 11, 12"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: Universaldünger bei Pflanzung", d:"Produkt: GROW by OBI BIO UF. Menge: 100g/m² oder 1 Handvoll/Pflanzloch.",                         b:"Beet 14"},
+    {t:"duenger",   g:"Pepperoni",      i:"🌿",kat:"Düngung",       h:"Pepperoni/Gurken: Grunddüngung",         d:"Produkt: GROW by OBI BIO UF. Menge: 80g/m². Alt.: 100g/m² Hühnermist 2 Wo. vorher.",              b:"Beete 15,16"},
+    {t:"duenger",   g:"Auberginen",     i:"🌿",kat:"Düngung",       h:"Auberginen: Hornspäne + Universaldünger", d:"Produkt: Hornspäne 80g/m² bei Pflanzung + UF 60g/m² nach 3 Wochen.",                            b:"Beet 10"},
+    {t:"duenger",   g:"Mais",           i:"🌿",kat:"Düngung",       h:"Mais/Zucchetti/Kürbis: Kompost + Hühnermist", d:"Produkt: Bio Capito Kompost 3kg/m² + Hühnermist 100g/m². Extreme Starkzehrer!",              b:"Beete 1–3"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten/Auberginen: Brennesseljauche 1. Gabe", d:"Produkt: Gesal Extrakt 1:10. Menge: 1–2L/Pflanze. 2–3 Wochen nach Pflanzung.",              b:"Beet 14, Beet 10"},
+    {t:"schutz",    g:"Alle",           i:"🐛",kat:"Pflanzenschutz",h:"Alle Jungpflanzen: Schneckenschutz",    d:"Schneckenkörner um alle Beete. Jungpflanzen extrem gefährdet!",                                   b:"Alle Beete"},
+    {t:"bewaessern",g:"Tomaten",        i:"💧",kat:"Bewässerung",   h:"Alle Neupflanzungen: täglich angiessen", d:"1–2 Wochen täglich bis eingewurzelt. Dann 2–3×/Woche.",                                          b:"Alle Neupflanzungen"},
   ],
   6:[
-    {t:"ernte",     i:"✂️",kat:"Ernte",        h:"Kopfsalat laufend ernten",                             d:"Erste Köpfe schnittreif. Ernten bevor Pflanze schiesst. Wärme fördert Schossen.",                b:"Beet 17"},
-    {t:"ernte",     i:"✂️",kat:"Ernte",        h:"Kohlrabi erste Ernte",                                 d:"Wenn Knolle tennisballgross (6–8 cm Ø). Nicht zu spät – wird holzig.",                          b:"Beet 11"},
-    {t:"ernte",     i:"✂️",kat:"Ernte",        h:"Krautstiel / Spinat laufend ernten",                   d:"Äussere Blätter laufend schneiden – fördert Neubildung.",                                        b:"Beet 12"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Tomaten alle 2 Wochen düngen",                         d:"Ab Juni regelmässig Universaldünger. Kaliumreicher Dünger fördert Fruchtbildung.",                b:"Beet 14"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Kompost für Zucchetti/Kürbis/Mais",                    d:"Flüssigkompost oder Brennnesseljauche alle 3 Wochen. Sehr hoher Nährstoffbedarf.",               b:"Beete 1–3"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Mehltau Tomaten beobachten",                           d:"Hohe Luftfeuchtigkeit fördert Mehltau. Blätter kontrollieren, befallene sofort entfernen. Nicht über Blätter giessen.", b:"Beet 14"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Blattläuse auf Bohnen kontrollieren",                  d:"Schwarze Bohnenlaus beobachten. Triebspitzen bei Befall abknipsen. Marienkäfer fördern.",        b:"Beet 10"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Gurkenmosaikvirus vorbeugen",                          d:"Läuse als Virusüberträger bekämpfen. Befallene Pflanzen sofort entfernen.",                      b:"Beete 15,16"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung intensivieren",                            d:"Hitzewellen: täglich giessen, morgens früh. Tomaten gleichmässig – Trockenstress verursacht Blütenendenfäule.", b:"Beet 14, Beete 1–3"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Kopfsalat kühlen",                                     d:"Salat bei Hitze täglich giessen, Erde feucht halten. Schossen durch Trockenstress verhindern.",   b:"Beet 17"},
+    {t:"ernte",     g:"Kopfsalat",      i:"✂️",kat:"Ernte",         h:"Kopfsalat: laufend ernten",              d:"Wenn Kopf fest. Vor Schossen ernten – Wärme beschleunigt es!",                                    b:"Beet 17"},
+    {t:"ernte",     g:"Kohlrabi",       i:"✂️",kat:"Ernte",         h:"Kohlrabi: erste Ernte",                  d:"Wenn Knolle 6–8cm Ø. Nicht warten – wird holzig.",                                                b:"Beet 11"},
+    {t:"ernte",     g:"Krautstiel",     i:"✂️",kat:"Ernte",         h:"Krautstiel: äussere Blätter",            d:"Äussere Blätter schneiden – fördert Neubildung. Max. 1/3 auf einmal.",                             b:"Beet 12"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 1. Juniwoche – Universaldünger", d:"Produkt: GROW by OBI BIO UF. Menge: 20ml/10L Wasser → 1L/Pflanze giessen.",                     b:"Beet 14"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 3. Juniwoche – Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 1–1.5L/Pflanze. Wöchentlicher Wechsel mit UF.",             b:"Beet 14"},
+    {t:"duenger",   g:"Zucchetti",      i:"🌿",kat:"Düngung",       h:"Zucchetti/Kürbis/Mais: Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 2–3L/m² alle 3 Wochen. Sehr hoher Nährstoffbedarf!",        b:"Beete 1–3"},
+    {t:"duenger",   g:"Blaukabis",      i:"🌿",kat:"Düngung",       h:"Blaukabis/Lauch: Brennesseljauche + Hühnermist", d:"Produkt: Gesal Extrakt 1:10 (1×/Juni) + Hühnermist 50g/m² (einmalig Juni).",            b:"Beet 11"},
+    {t:"duenger",   g:"Auberginen",     i:"🌿",kat:"Düngung",       h:"Auberginen: alle 2 Wochen Universaldünger", d:"Produkt: GROW by OBI BIO UF flüssig. Menge: 1L/Pflanze alle 14 Tage.",                       b:"Beet 10"},
+    {t:"duenger",   g:"Gurken",         i:"🌿",kat:"Düngung",       h:"Gurken/Pepperoni: 2. Juniwoche Universaldünger", d:"Produkt: GROW by OBI BIO UF. Menge: 1L/Pflanze. Ab Juni alle 14 Tage.",                 b:"Beete 15,16"},
+    {t:"schutz",    g:"Tomaten",        i:"🐛",kat:"Pflanzenschutz",h:"Tomaten: Mehltau kontrollieren",         d:"Blätter täglich prüfen. Befallene entfernen. Produkt: Gesal Extrakt 1:20 auf Blätter (abends).",  b:"Beet 14"},
+    {t:"schutz",    g:"Buschbohnen",    i:"🐛",kat:"Pflanzenschutz",h:"Buschbohnen: Schwarze Bohnenlaus",       d:"Triebspitzen abknipsen. Produkt: Gesal Extrakt 1:20 abends auf Blätter spritzen.",                b:"Beet 10"},
+    {t:"schutz",    g:"Gurken",         i:"🐛",kat:"Pflanzenschutz",h:"Gurken/Pepperoni: Läuse vorbeugend",     d:"Produkt: Gesal Extrakt 1:20, alle 2 Wochen vorbeugend. Läuse = Virusvektoren!",                   b:"Beete 15,16"},
+    {t:"bewaessern",g:"Tomaten",        i:"💧",kat:"Bewässerung",   h:"Tomaten: täglich gleichmässig giessen",  d:"GLEICHMÄSSIG! Schwankungen → Blütenendenfäule. Morgens giessen, nicht auf Blätter.",              b:"Beet 14"},
+    {t:"bewaessern",g:"Kopfsalat",      i:"💧",kat:"Bewässerung",   h:"Kopfsalat: bei Hitze täglich",           d:"Feucht halten – Trockenheit fördert Schossen. Morgens giessen.",                                  b:"Beet 17"},
   ],
   7:[
-    {t:"ernte",     i:"🥔",kat:"Ernte",        h:"Frühkartoffeln ernten",                                d:"Wenn Laub welkt beginnt Ernte. Trocken lagern. Nicht im Licht aufbewahren (grüne Stellen).",      b:"Beete 4–7"},
-    {t:"ernte",     i:"🧅",kat:"Ernte",        h:"Zwiebeln ernten",                                      d:"Wenn 2/3 des Laubs umgeknickt ist. Auf Beet liegenl. trocknen, 2–3 Wochen. Danach kühl lagern.", b:"Beete 8,9"},
-    {t:"ernte",     i:"🥕",kat:"Ernte",        h:"Karotten erste Ernte",                                 d:"Erste Karotten ab Juli. Laufend nach Bedarf ernten bis Oktober.",                               b:"Beete 8,9"},
-    {t:"ernte",     i:"🍅",kat:"Ernte",        h:"Tomaten erste Ernte",                                  d:"Erste reife Früchte ernten. Vollreif bei kräftiger Farbe und weichem Druckpunkt.",               b:"Beet 14"},
-    {t:"ernte",     i:"🥒",kat:"Ernte",        h:"Zucchetti täglich kontrollieren",                      d:"Klein ernten (15–20 cm) – fördert Neubildung. Bei Hitze täglich kontrollieren.",                 b:"Beete 1–3"},
-    {t:"ernte",     i:"🫘",kat:"Ernte",        h:"Buschbohnen ernten",                                   d:"Wenn Hülsen ca. Bleistiftdicke haben. Regelmässig ernten fördert Neubildung.",                   b:"Beet 10"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Tomaten/Gurken/Pepperoni alle 2 Wochen",               d:"Regelmässig düngen für kontinuierliche Fruchtbildung. Universaldünger, kaliumbetont.",            b:"Beet 14, Beete 15,16"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Kartoffelbeete nach Ernte vorbereiten",                d:"Nach Kartoffelernte: Kompost einarbeiten für nächste Kultur.",                                   b:"Beete 4–7"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Kraut- und Braunfäule Tomaten",                        d:"Warmes, feuchtes Wetter: Blätter täglich auf braune Flecken kontrollieren. Befallene Blätter sofort entfernen.", b:"Beet 14"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Kartoffelkäfer kontrollieren",                        d:"Kartoffelkäfer und Larven von Hand absammeln. Eier auf Blattunterseite abwischen.",              b:"Beete 4–7"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Echter Mehltau Zucchetti/Kürbis",                      d:"Weisser Belag auf Blättern bei Hitze. Befallene Blätter entfernen. Milch-Wasser-Spray (1:9).",   b:"Beete 1–3"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Hochsommer: Bewässerung täglich",                      d:"Bei Temperaturen über 25°C täglich giessen. Tief giessen, Boden 20 cm feucht. Morgens oder abends.", b:"Alle Beete"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Mulchen gegen Austrocknung",                           d:"Beete mulchen (Rasenschnitt, Stroh) um Verdunstung zu reduzieren. Spart 30–50% Wasser.",          b:"Alle Beete"},
+    {t:"ernte",     g:"Kartoffeln",     i:"🥔",kat:"Ernte",         h:"Kartoffeln: Frühkartoffeln ernten",      d:"Wenn Laub welkt ernten. Trocken lagern, kein Licht! Laufende Ernte bis September.",               b:"Beete 4–7"},
+    {t:"ernte",     g:"Zwiebeln",       i:"🧅",kat:"Ernte",         h:"Zwiebeln: ernten",                       d:"Wenn 2/3 Laub umgeknickt. 2–3 Wo. auf Beet trocknen, dann kühl lagern.",                          b:"Beete 8,9"},
+    {t:"ernte",     g:"Karotten",       i:"🥕",kat:"Ernte",         h:"Karotten: erste Ernte",                  d:"Ab Juli laufend nach Bedarf ernten. Im Boden lagerbar bis Oktober.",                              b:"Beete 8,9"},
+    {t:"ernte",     g:"Tomaten",        i:"🍅",kat:"Ernte",         h:"Tomaten: erste Ernte",                   d:"Vollreif: kräftige Farbe, weicher Druckpunkt. Laufend ernten fördert Neubildung.",                 b:"Beet 14"},
+    {t:"ernte",     g:"Zucchetti",      i:"🥒",kat:"Ernte",         h:"Zucchetti: täglich kontrollieren",       d:"Klein ernten (15–20cm) – fördert Neubildung. Täglich schauen!",                                   b:"Beete 1–3"},
+    {t:"ernte",     g:"Buschbohnen",    i:"🫘",kat:"Ernte",         h:"Buschbohnen: laufend ernten",            d:"Wenn Hülsen Bleistiftdicke. Regelmässig ernten = mehr Neubildung.",                               b:"Beet 10"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 1. Juliwoche Universaldünger",  d:"Produkt: GROW by OBI BIO UF. Menge: 20ml/10L→1L/Pflanze. Kaliumreich für Fruchtqualität.",       b:"Beet 14"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 3. Juliwoche Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 1.5L/Pflanze. Abwechselnd mit UF.",                          b:"Beet 14"},
+    {t:"duenger",   g:"Gurken",         i:"🌿",kat:"Düngung",       h:"Gurken: 1. Juli Universaldünger",        d:"Produkt: GROW by OBI BIO UF. Menge: 1L/Pflanze. Konstante Versorgung wichtig!",                  b:"Beete 15,16"},
+    {t:"duenger",   g:"Pepperoni",      i:"🌿",kat:"Düngung",       h:"Pepperoni: 3. Juli Brennesseljauche",    d:"Produkt: Gesal Extrakt 1:10. Menge: 1L/Pflanze. Abwechselnd mit UF.",                            b:"Beete 15,16"},
+    {t:"duenger",   g:"Zucchetti",      i:"🌿",kat:"Düngung",       h:"Zucchetti/Kürbis: Brennesseljauche Juli", d:"Produkt: Gesal Extrakt 1:10. Menge: 3L/m² alle 3 Wochen. Mais: ab Juli keine Düngung mehr.",    b:"Beete 1–3"},
+    {t:"schutz",    g:"Tomaten",        i:"🐛",kat:"Pflanzenschutz",h:"Tomaten: Braunfäule täglich kontrollieren", d:"Juli = Hauptrisikomonat. Produkt: Gesal Extrakt 1:20 vorbeugend alle 5 Tage spritzen.",        b:"Beet 14"},
+    {t:"schutz",    g:"Kartoffeln",     i:"🐛",kat:"Pflanzenschutz",h:"Kartoffeln: Kartoffelkäfer absammeln",   d:"Käfer und Larven von Hand entfernen. Eier unter Blättern abwischen.",                             b:"Beete 4–7"},
+    {t:"schutz",    g:"Zucchetti",      i:"🐛",kat:"Pflanzenschutz",h:"Zucchetti/Kürbis: Echter Mehltau",      d:"Weisser Belag bei Hitze. Produkt: Gesal Extrakt 1:20 oder Milch-Wasser 1:9 alle 5 Tage.",        b:"Beete 1–3"},
+    {t:"bewaessern",g:"Alle",           i:"💧",kat:"Bewässerung",   h:"Alle Beete: Hochsommer täglich giessen", d:"Über 25°C täglich morgens. Tief giessen (20cm). Mulchen: spart 30–50% Wasser.",                  b:"Alle Beete"},
   ],
   8:[
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Feldsalat / Nüssler säen",                             d:"Nach Kartoffelernte direkt säen. 5 Reihen, 15 cm Abstand. Keimung in 7–10 Tagen.",              b:"Beete 4–7 (2 Beete) + Beet 17"},
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Endivien pflanzen",                                    d:"2 Reihen, 30 cm Abstand. Noch genug Zeit nach Kartoffelernte Juli.",                             b:"Beete 4–7 (2 Beete)"},
-    {t:"pflanzen",  i:"🌱",kat:"Pflanzen",     h:"Herbst-Spinat säen",                                   d:"Nach Bohnen-Ernte sofort Spinat nachsäen. Frosthart, Ernte bis November.",                      b:"Beet 10"},
-    {t:"ernte",     i:"🍆",kat:"Ernte",        h:"Auberginen ernten",                                    d:"Bei 12–15 cm Länge und glänzender Schale ernten. Nicht zu spät – wird bitter.",                  b:"Beet 10"},
-    {t:"ernte",     i:"🎃",kat:"Ernte",        h:"Kürbis erste Ernte",                                   d:"Wenn Stiel anfängt zu verkorken und Schale hart ist. Stiel 5 cm lang lassen.",                   b:"Beete 1–3"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Kompost nach Kartoffelernte",                          d:"Beete nach Ernte mit reifem Kompost abdecken. Vorbereitung für Folgekultur.",                    b:"Beete 4–7"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Letzte Stickstoffdüngung Tomaten",                     d:"Keine Stickstoffdüngung mehr ab August – fördert Reifeabschluss statt Blattwachstum.",           b:"Beet 14"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Kraut-/Braunfäule intensiv beobachten",                d:"August = Hauptrisikomonat für Phytophthora. Nach Regen befallene Blätter sofort entfernen.",      b:"Beet 14"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Mehltau Zucchetti/Kürbis behandeln",                   d:"Augusthitze fördert Mehltau stark. Milch-Wasser (1:9) alle 5 Tage spritzen.",                   b:"Beete 1–3"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung anpassen",                                  d:"Tomaten gleichmässig feucht – Schwankungen verursachen Blütenendenfäule und Platzen.",           b:"Beet 14"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Neue Kulturen täglich giessen",                        d:"Feldsalat und Endivien nach Aussaat täglich giessen bis Keimung.",                               b:"Beete 4–7, Beet 17"},
+    {t:"pflanzen",  g:"Feldsalat",      i:"🌱",kat:"Pflanzen",      h:"Feldsalat/Nüssler: säen",                d:"Methode: Säen. 5 Reihen, 15cm Abstand. Nach Kartoffelernte. Keimung 7–10 Tage.",                   b:"Beete 4–7 + Beet 17"},
+    {t:"pflanzen",  g:"Endivien",       i:"🥬",kat:"Pflanzen",      h:"Endivien: pflanzen",                     d:"Methode: Jungpflanzen setzen. 2 Reihen, 30cm Abstand. Nach Kartoffelernte.",                       b:"Beete 4–7"},
+    {t:"pflanzen",  g:"Spinat",         i:"🌱",kat:"Pflanzen",      h:"Spinat: Herbstsaat",                     d:"Methode: Säen. Nach Bohnen-Ernte sofort säen. Frosthart, Ernte bis November.",                    b:"Beet 10"},
+    {t:"ernte",     g:"Auberginen",     i:"🍆",kat:"Ernte",         h:"Auberginen: laufend ernten",             d:"Bei 12–15cm und glänzender Schale ernten. Zu spät = bitter.",                                     b:"Beet 10"},
+    {t:"ernte",     g:"Kürbis",         i:"🎃",kat:"Ernte",         h:"Kürbis: erste Ernte",                    d:"Wenn Stiel verkorkt und Schale hart. Stiel 5cm lassen.",                                          b:"Beete 1–3"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: letzte Gabe 1.–5. August",      d:"Produkt: Gesal Extrakt 1:10. Menge: 1L/Pflanze. LETZTE GABE! Ab 15.Aug keine Düngung mehr!",      b:"Beet 14"},
+    {t:"duenger",   g:"Gurken",         i:"🌿",kat:"Düngung",       h:"Gurken/Pepperoni: letzte Düngung Mitte Aug", d:"Produkt: GROW by OBI BIO UF. Letzte Gabe Mitte August 1L/Pflanze. Danach nur giessen.",      b:"Beete 15,16"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Ab 15. Aug: KEINE Stickstoffdüngung mehr", d:"Kein UF, keine Brennesseljauche, kein Hühnermist! Nur noch giessen. Reifeabschluss!",          b:"Alle Fruchtgemüse"},
+    {t:"duenger",   g:"Kartoffeln",     i:"🌿",kat:"Düngung",       h:"Kartoffelbeete: Kompost nach Ernte",     d:"Produkt: Bio Capito Kompost. Menge: 3–4kg/m² auf leere Beete. Vorbereitung Nüssler.",             b:"Beete 4–7"},
+    {t:"schutz",    g:"Tomaten",        i:"🐛",kat:"Pflanzenschutz",h:"Tomaten: Braunfäule Hochrisikomonat",    d:"Nach Regen kontrollieren. Produkt: Gesal Extrakt 1:20 alle 5 Tage vorbeugend.",                   b:"Beet 14"},
+    {t:"schutz",    g:"Zucchetti",      i:"🐛",kat:"Pflanzenschutz",h:"Zucchetti: Mehltau behandeln",           d:"Produkt: Gesal Extrakt 1:20 oder Milch-Wasser 1:9. Alle 5 Tage spritzen.",                        b:"Beete 1–3"},
+    {t:"bewaessern",g:"Feldsalat",      i:"💧",kat:"Bewässerung",   h:"Feldsalat/Endivien: täglich bis Keimung", d:"Täglich fein giessen bis Keimung. Danach moderat – Staunässe vermeiden.",                       b:"Beete 4–7, Beet 17"},
   ],
   9:[
-    {t:"pflanzen",  i:"🧄",kat:"Pflanzen",     h:"Knoblauch stecken",                                    d:"Nach Mais/Kürbis-Ernte: 6 Reihen, 15 cm Abstand, 25 cm in Reihe, 5 cm tief. Spitze nach oben.", b:"Beete 1–3"},
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Nüssler nach Zwiebeln säen",                           d:"Direkt nach Zwiebelernte säen. 5 Reihen, lückenlosen Bestand anstreben.",                        b:"Beete 8,9"},
-    {t:"pflanzen",  i:"🥬",kat:"Pflanzen",     h:"Zuckerhut pflanzen",                                   d:"Nach Fenchel/Krautstiel-Ernte einpflanzen. 2 Reihen, 30 cm Abstand.",                           b:"Beet 12"},
-    {t:"ernte",     i:"🌑",kat:"Ernte",        h:"Schwarzwurzeln (Ernte beginnt)",                       d:"Ab September ernten. Bei Frost wird der Geschmack süsser – lässt sich im Boden lagern.",          b:"Beet 13"},
-    {t:"ernte",     i:"🌿",kat:"Ernte",        h:"Fenchel Haupternte",                                   d:"Knollen vollständig ernten vor starkem Frost. Trocken und kühl lagern.",                         b:"Beet 12"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Hornspäne Herbst – Frühjahrseffekt",                   d:"Hornspäne jetzt einarbeiten: Wirkung erst im Frühjahr. Ideal für Fruchtfolge-Beete 4–13.",       b:"Alle Fruchtfolge-Beete"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Pilzdruck Tomaten – Endphase",                         d:"September: Nächte kühler, Pilzdruck steigt. Befallene Triebe täglich entfernen.",                 b:"Beet 14"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Schnecken Herbstaktivität",                            d:"Kühle feuchte Nächte = hohe Schneckenaktivität. Nüssler und Endivien schützen.",                 b:"Beete 4–7, Beet 17"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung reduzieren",                               d:"September: Naturegen meist ausreichend. Nur bei Trockenheit giessen.",                           b:"Alle Beete"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Knoblauch nach Stecken giessen",                       d:"Einmal gut angiessen, dann bis Frühjahr kaum Wasserbedarf.",                                     b:"Beete 1–3"},
+    {t:"pflanzen",  g:"Knoblauch",      i:"🧄",kat:"Pflanzen",      h:"Knoblauch: stecken",                     d:"Methode: Setzen/Stecken. 6 Reihen, 15cm Abstand, 25cm in Reihe, 5cm tief, Spitze nach oben.",    b:"Beete 1–3"},
+    {t:"pflanzen",  g:"Feldsalat",      i:"🥬",kat:"Pflanzen",      h:"Nüssler: nach Zwiebelernte säen",        d:"Methode: Säen. 5 Reihen, lückenlosen Bestand anstreben.",                                         b:"Beete 8,9"},
+    {t:"pflanzen",  g:"Zuckerhut",      i:"🥬",kat:"Pflanzen",      h:"Zuckerhut: pflanzen",                    d:"Methode: Jungpflanzen setzen. 2 Reihen, 30cm Abstand. Nach Fenchel/Krautstiel-Ernte.",            b:"Beet 12"},
+    {t:"ernte",     g:"Schwarzwurzeln", i:"🌑",kat:"Ernte",         h:"Schwarzwurzeln: Ernte beginnt",          d:"Ab September ernten. Bei Frost wird Geschmack süsser.",                                           b:"Beet 13"},
+    {t:"ernte",     g:"Fenchel",        i:"🌿",kat:"Ernte",         h:"Fenchel: Haupternte",                    d:"Vollständig vor starkem Frost. Trocken und kühl lagern.",                                         b:"Beet 12"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Alle: Hornspäne Herbst (Wirkung ab März 2027)", d:"Produkt: Hauert Biorga Hornspäne. Menge: 80–100g/m² einarbeiten. Jetzt = Frühjahr 2027!", b:"Beete 4–13"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Leere Beete: Kuhmist Herbstdüngung",     d:"Kompostierter Kuhmist. Menge: 3–5kg/m² ausbringen, leicht einharken.",                           b:"Beete 8,9,12,13"},
+    {t:"duenger",   g:"Knoblauch",      i:"🌿",kat:"Düngung",       h:"Knoblauch: Hühnermist beim Stecken",     d:"Produkt: Geistlich Hühnermist. Menge: 60g/m² in Furche einarbeiten.",                            b:"Beete 1–3"},
+    {t:"schutz",    g:"Tomaten",        i:"🐛",kat:"Pflanzenschutz",h:"Tomaten: Pilzdruck Endphase",            d:"Kühlere Nächte = mehr Pilzdruck. Befallene Triebe täglich entfernen.",                            b:"Beet 14"},
+    {t:"schutz",    g:"Feldsalat",      i:"🐛",kat:"Pflanzenschutz",h:"Feldsalat/Endivien: Schneckenschutz",    d:"Kühle Nächte = hohe Schneckenaktivität. Schneckenkörner legen.",                                  b:"Beete 4–7, Beet 17"},
+    {t:"bewaessern",g:"Knoblauch",      i:"💧",kat:"Bewässerung",   h:"Knoblauch: einmalig angiessen",          d:"Nach Stecken einmal gut angiessen. Dann kaum Bedarf bis Frühjahr.",                               b:"Beete 1–3"},
   ],
   10:[
-    {t:"pflanzen",  i:"🌿",kat:"Pflanzen",     h:"Winterlauch pflanzen",                                 d:"Nach Pepperoni/Gurken-Ernte: 2 Reihen, 10 cm in Reihe. Jungpflanzen noch bis Ende Oktober.",     b:"Beete 15,16"},
-    {t:"ernte",     i:"🎃",kat:"Ernte",        h:"Kürbis & Mais Haupternte",                             d:"Vollständig ernten vor Frost. Kürbis bei Zimmertemperatur lagern. Mais: Kolben bei braunen Fäden.", b:"Beete 1–3"},
-    {t:"ernte",     i:"🥬",kat:"Ernte",        h:"Endivien ernten",                                      d:"Vor starkem Frost (unter –3°C) ernten oder mit Vlies abdecken.",                                 b:"Beete 4–7"},
-    {t:"ernte",     i:"🥦",kat:"Ernte",        h:"Blaukabis ernten",                                     d:"Frosthart – kann stehen bleiben. Ernte nach erstem Frost: besserer Geschmack.",                  b:"Beet 11"},
-    {t:"ernte",     i:"🥬",kat:"Ernte",        h:"Zuckerhut – laufend ernten",                           d:"Ernte bis Dezember möglich. Frosthart bis –5°C.",                                                b:"Beet 12"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Winterkompost ausbringen",                             d:"Reifen Kompost auf leere Beete ausbringen. Über Winter einarbeiten lassen.",                     b:"Beete 4–13 (nach Ernte)"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Wühlmaus-Kontrolle",                                  d:"Herbst: Wühlmäuse aktiv. Laufgänge suchen. Mausefallen oder Repellents einsetzen.",             b:"Alle Beete"},
-    {t:"pflege",    i:"🛠", kat:"Pflege",       h:"Beete für Winter vorbereiten",                         d:"Leere Beete mulchen (Stroh, Laub). Schützt Bodenlebewesen und verhindert Erosion.",             b:"Alle leeren Beete"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Bewässerung einstellen",                               d:"Oktober: Naturegen reicht aus. Bewässerungssystem winterfest machen (Frostschutz).",             b:"Alle Beete"},
+    {t:"pflanzen",  g:"Winterlauch",    i:"🌿",kat:"Pflanzen",      h:"Winterlauch: pflanzen",                  d:"Methode: Jungpflanzen setzen. 2 Reihen, 10cm in Reihe. Bis Ende Oktober.",                        b:"Beete 15,16"},
+    {t:"ernte",     g:"Kürbis",         i:"🎃",kat:"Ernte",         h:"Kürbis/Mais: Haupternte",                d:"Vor Frost. Kürbis bei Zimmertemperatur lagern. Mais: Kolben bei braunen Fäden.",                  b:"Beete 1–3"},
+    {t:"ernte",     g:"Endivien",       i:"🥬",kat:"Ernte",         h:"Endivien: vor Frost ernten",             d:"Vor –3°C ernten oder mit Vlies abdecken.",                                                        b:"Beete 4–7"},
+    {t:"ernte",     g:"Blaukabis",      i:"🥦",kat:"Ernte",         h:"Blaukabis: nach erstem Frost",           d:"Frosthart – nach Frost besserer Geschmack. Kann stehen bleiben.",                                b:"Beet 11"},
+    {t:"ernte",     g:"Zuckerhut",      i:"🥬",kat:"Ernte",         h:"Zuckerhut: laufend ernten",              d:"Bis Dezember. Frosthart bis –5°C.",                                                               b:"Beet 12"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Alle leeren Beete: Kompost + Kuhmist",   d:"Produkt: Bio Capito Kompost 3kg/m² + Kuhmist 2kg/m². Oktober nach Räumung einarbeiten.",          b:"Beete 4–13"},
+    {t:"bewaessern",g:"Alle",           i:"💧",kat:"Bewässerung",   h:"Bewässerungssystem winterfest machen",   d:"Schläuche entleeren und einlagern. Leitungen frostfrei sichern.",                                b:"Alle Beete"},
   ],
   11:[
-    {t:"ernte",     i:"🥬",kat:"Ernte",        h:"Feldsalat / Nüssler laufend ernten",                   d:"Winterhart bis –15°C. Laufend nach Bedarf ernten. Bei Schnee freischaufeln.",                    b:"Beete 4–7, Beet 17"},
-    {t:"ernte",     i:"🌿",kat:"Ernte",        h:"Lauch laufend ernten",                                 d:"Winterlauch steht bis März. Bei Frost: Stangen können gefroren sein, nach Auftauen trotzdem gut.", b:"Beet 11"},
-    {t:"ernte",     i:"🌑",kat:"Ernte",        h:"Schwarzwurzeln laufend",                               d:"Nach Frost wird Geschmack süsser. Tiefwurzler – lässt sich gut im Boden lagern.",                b:"Beet 13"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Kompost einarbeiten",                                  d:"Letzte Kompost-Gabe vor Winter. Bodenverbesserung für kommende Saison.",                         b:"Alle leeren Beete"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Pilzschutz Feldsalat",                                 d:"Bei feuchtem Herbstwetter Pilzkrankheiten (Falscher Mehltau) auf Feldsalat beobachten.",         b:"Beet 17"},
-    {t:"pflege",    i:"🛠", kat:"Pflege",       h:"Gartengeräte reinigen & einlagern",                    d:"Gartengeräte reinigen, ölen und einlagern. Bewässerungsschläuche entleeren.",                    b:"–"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Nur bei Frost und Sonnenschein giessen",               d:"Wintergemüse bei gefrorenem Boden und Sonneneinstrahlung vor Austrocknung schützen.",            b:"Beet 17, Beet 11"},
+    {t:"ernte",     g:"Feldsalat",      i:"🥬",kat:"Ernte",         h:"Feldsalat/Nüssler: laufend ernten",      d:"Winterhart bis –15°C. Bei Schnee freischaufeln.",                                                 b:"Beete 4–7, Beet 17"},
+    {t:"ernte",     g:"Lauch",          i:"🌿",kat:"Ernte",         h:"Winterlauch: laufend ernten",            d:"Steht bis März. Bei Frost: nach Auftauen ernten.",                                               b:"Beet 11"},
+    {t:"ernte",     g:"Schwarzwurzeln", i:"🌑",kat:"Ernte",         h:"Schwarzwurzeln: laufend ernten",         d:"Nach Frost süsser. Im Boden lagerbar bis Februar.",                                              b:"Beet 13"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Alle: letzte Kompost-Gabe",              d:"Produkt: Bio Capito Kompost. Menge: 2–3kg/m². Vor dem Frost einarbeiten.",                        b:"Alle leeren Beete"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Dünger-Inventur: Bedarf 2027 planen",    d:"Hornspäne (100g/m²×10 Beete), Hühnermist (100g/m²×6 Beete), Kompost, UF, Gesal Extrakt.",       b:"–"},
+    {t:"schutz",    g:"Feldsalat",      i:"🐛",kat:"Pflanzenschutz",h:"Feldsalat: Falscher Mehltau",            d:"Feuchtes Wetter fördert Pilze. Befallene Blätter entfernen.",                                     b:"Beet 17"},
+    {t:"bewaessern",g:"Feldsalat",      i:"💧",kat:"Bewässerung",   h:"Wintergemüse: bei Frost + Sonne giessen", d:"Bei gefrorenem Boden und Sonnenschein vor Austrocknung schützen.",                              b:"Beet 17, Beet 11"},
   ],
   12:[
-    {t:"ernte",     i:"🥬",kat:"Ernte",        h:"Feldsalat & Winterlauch",                              d:"Winterernte läuft. Bei Schneelage freischaufeln. Ernte auch bei leichtem Frost möglich.",        b:"Beet 17, Beete 15,16"},
-    {t:"ernte",     i:"🌑",kat:"Ernte",        h:"Schwarzwurzeln",                                       d:"Dezember-Ernte besonders süss. Bei gefrorenem Boden bis Tauwetter warten.",                      b:"Beet 13"},
-    {t:"duenger",   i:"🌿",kat:"Düngung",      h:"Saatgut & Dünger für 2027 planen",                     d:"Düngervorrat prüfen. Hornspäne, Kompost und Universaldünger für neues Jahr bestellen.",          b:"–"},
-    {t:"pflege",    i:"🛠", kat:"Pflege",       h:"Beete wintervorbereiten & Planung 2027",               d:"Fruchtfolgeplan für 2027 kontrollieren. Saatgut bestellen. Beete für Winter abdecken.",          b:"Alle"},
-    {t:"schutz",    i:"🐛",kat:"Pflanzenschutz",h:"Wühlmäuse bekämpfen",                                  d:"Winter: Wühlmäuse suchen Schutz in Beeten. Fallen kontrollieren und nachstellen.",               b:"Alle Beete"},
-    {t:"bewaessern",i:"💧",kat:"Bewässerung",  h:"Winterschutz Bewässerungssystem",                      d:"Alle Leitungen müssen frostfrei sein. Tropfschläuche einlagern.",                                b:"–"},
+    {t:"ernte",     g:"Feldsalat",      i:"🥬",kat:"Ernte",         h:"Feldsalat/Winterlauch: Winterernte",     d:"Bei Schneelage freischaufeln. Auch bei leichtem Frost erntbar.",                                  b:"Beet 17, Beete 15,16"},
+    {t:"ernte",     g:"Schwarzwurzeln", i:"🌑",kat:"Ernte",         h:"Schwarzwurzeln: Dezemberernte",          d:"Süssester Zeitpunkt. Bei Frost bis Tauwetter warten.",                                            b:"Beet 13"},
+    {t:"duenger",   g:"Alle",           i:"🌿",kat:"Düngung",       h:"Dünger & Saatgut 2027 bestellen",        d:"Produkte: GROW by OBI BIO UF, Hauert Hornspäne, Geistlich Hühnermist, Gesal Extrakt. Saatgut frühzeitig!", b:"–"},
+    {t:"pflege",    g:"Alle",           i:"🛠",kat:"Pflege",         h:"Planung 2027: Fruchtfolgeplan prüfen",   d:"Fruchtfolge-Tab kontrollieren. Beete mit Mulch abdecken.",                                        b:"Alle"},
+    {t:"schutz",    g:"Alle",           i:"🐛",kat:"Pflanzenschutz",h:"Alle Beete: Wühlmäuse bekämpfen",        d:"Winter: Wühlmäuse suchen Schutz. Fallen kontrollieren.",                                          b:"Alle Beete"},
   ]
-};
-
-// tbEntries: freihand-Journaleinträge (Beobachtungen, Ernte, etc.)
-// Pflanz/Saat-Aktionen aus dem Excel-Journal sind in histPflLog
-let tbEntries=[];
-
-// duengerLog: manuell eingetragene Düngungen
-let duengerLog=[];
-let schutzLog=[];
-let wasserLog=[];
-
-// newPflLog: manuell im Pflege-Tab erfasste Pflanzungen (für Pflege-Anzeige)
-let newPflLog = [];
-
-// Historische Pflanz- und Saat-Einträge aus Journal.xlsx
-// Methodik: gesät → Säen | gesetzt/gepflanzt → Setzen/Stecken bzw. Jungpflanzen setzen
-let pflLog=[
-  {d:"19.03.2026", k:"Zwiebeln",      beet:"Beet 8/9",   methode:"Setzen / Stecken",   due:"Universaldünger"},
-  {d:"19.03.2026", k:"Karotten",      beet:"Beet 8/9",   methode:"Säen",               due:"Universaldünger"},
-  {d:"19.03.2026", k:"Kartoffeln",    beet:"Beet 4-7",   methode:"Setzen / Stecken",   due:"Universaldünger"},
-  {d:"23.04.2026", k:"Kopfsalat",     beet:"Beet 17",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"23.04.2026", k:"Schwarzwurzeln",beet:"Beet 13",    methode:"Säen",               due:"Universaldünger"},
-  {d:"22.05.2026", k:"Mais",          beet:"Beet 1/2/3", methode:"Säen",               due:"Universaldünger"},
-  {d:"22.05.2026", k:"Zucchetti",     beet:"Beet 1/2/3", methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Kürbis",        beet:"Beet 1/2/3", methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Kopfsalat",     beet:"Beet 17",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Auberginen",    beet:"Beet 10",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Buschbohnen",   beet:"Beet 10",    methode:"Säen",               due:"Universaldünger"},
-  {d:"22.05.2026", k:"Kohlrabi",      beet:"Beet 11",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Blaukabis",     beet:"Beet 11",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Lauch",         beet:"Beet 11",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Fenchel",       beet:"Beet 12",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Krautstiel",    beet:"Beet 12",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Tomaten",       beet:"Beet 14",    methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Pepperoni",     beet:"Beet 15/16", methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Paprika",       beet:"Beet 15/16", methode:"Jungpflanzen setzen",due:"Universaldünger"},
-  {d:"22.05.2026", k:"Gurken",        beet:"Beet 15/16", methode:"Jungpflanzen setzen",due:"Universaldünger"}
-];
-
-// Stepper state
-let frI=1,daI=2,dII=1,wLI=2,wMI=1;
-const frO=["1x/Woche","2x/Woche","3x/Woche","täglich"];
-const daO=["10 min","15 min","20 min","30 min","45 min","60 min"];
-const dIO=["alle 7 Tage","alle 14 Tage","alle 21 Tage","monatlich"];
-const wLO=["2 Liter","5 Liter","10 Liter","15 Liter","20 Liter","30 Liter","50 Liter"];
-const wMO=["5 min","10 min","15 min","20 min","30 min","45 min","60 min"];
-let curYear=0,curMonth=new Date().getMonth()+1,libF='alle',tbF='alle';
-let kalRead={}; // {monat_gruppeIdx: true} für gelesene Einträge
-const months=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-
-const bib=[
-  {n:"Kartoffeln",e:"🥔",t:"haupt",tl:"Hauptkultur",s:"Februar–April (Stecken)",er:"Juli–September",r:"2",a:"30 cm",ir:"10 cm",vor:"–",nach:"Nüssler od. Endivien",f:"Folge II",p:"5 Jahre",h:"Nicht nach Tomaten/Auberginen.",due:"Universaldünger beim Stecken"},
-  {n:"Zwiebeln",e:"🧅",t:"haupt",tl:"Hauptkultur",s:"April (Steckzwiebeln)",er:"Juli–August",r:"2",a:"40 cm",ir:"8 cm",vor:"Frühlingszwiebeln",nach:"Nüssler",f:"Folge III",p:"4 Jahre",h:"Nach Blattfall trocknen.",due:"Universaldünger beim Stecken"},
-  {n:"Karotten",e:"🥕",t:"haupt",tl:"Hauptkultur",s:"April–Juni (gestaffelt)",er:"Juli–Oktober",r:"2",a:"20 cm",ir:"4 cm",vor:"Frühlingszwiebeln",nach:"–",f:"Folge III",p:"4 Jahre",h:"Alle 3 Wochen neu säen.",due:"Universaldünger bei Saat"},
-  {n:"Mais",e:"🌽",t:"haupt",tl:"Hauptkultur",s:"Mitte Mai",er:"August–September",r:"3",a:"30 cm",ir:"10 cm",vor:"–",nach:"Knoblauch (Sept)",f:"Fix – Beet 1/2/3",p:"–",h:"Blöcke 3x3 – Windbestäubung!",due:"Universaldünger bei Saat"},
-  {n:"Zucchetti",e:"🥒",t:"haupt",tl:"Hauptkultur",s:"Mai (vorgez. ab April)",er:"Juli–Oktober",r:"2 Pflanzen",a:"–",ir:"–",vor:"–",nach:"Knoblauch",f:"Fix – Beet 1/2/3",p:"4 Jahre",h:"Klein ernten – Neubildung.",due:"Kompost / Universaldünger"},
-  {n:"Kürbis",e:"🎃",t:"haupt",tl:"Hauptkultur",s:"Mai (vorgez. ab April)",er:"September–Oktober",r:"2 Pflanzen",a:"–",ir:"–",vor:"–",nach:"Knoblauch",f:"Fix – Beet 1/2/3",p:"4 Jahre",h:"Ernte wenn Stiel verkorkt.",due:"Kompost"},
-  {n:"Auberginen",e:"🍆",t:"haupt",tl:"Hauptkultur",s:"Feb–März (Anzucht 20°C)",er:"August–Oktober",r:"3 Pflanzen",a:"0 cm",ir:"20 cm",vor:"–",nach:"Spinat",f:"Folge IV",p:"4 Jahre",h:"Erst nach letztem Frost.",due:"Universaldünger bei Pflanzung"},
-  {n:"Buschbohnen",e:"🫘",t:"haupt",tl:"Hauptkultur",s:"Mitte Mai–Juni",er:"Juli–September",r:"2",a:"30 cm",ir:"4 cm",vor:"–",nach:"Spinat",f:"Folge IV",p:"3 Jahre",h:"Stickstoffsammler.",due:"Kein Stickstoffdünger!"},
-  {n:"Kohlrabi",e:"🥦",t:"haupt",tl:"Hauptkultur",s:"April–Juni (gestaffelt)",er:"Mai–Oktober",r:"1",a:"30 cm",ir:"20 cm",vor:"Spinat",nach:"–",f:"Folge V",p:"3 Jahre",h:"Alle 3 Wochen neu pflanzen.",due:"Universaldünger bei Pflanzung"},
-  {n:"Blaukabis",e:"🥬",t:"haupt",tl:"Hauptkultur",s:"Feb–März (Anzucht)",er:"August–November",r:"1",a:"50 cm",ir:"50 cm",vor:"Spinat",nach:"–",f:"Folge V",p:"3 Jahre",h:"Frosthart. Mindestabstand 50 cm.",due:"Hornspäne vor Pflanzung"},
-  {n:"Lauch",e:"🌿",t:"haupt",tl:"Hauptkultur",s:"Januar–Februar (Anzucht)",er:"November–März",r:"2",a:"0 cm",ir:"10 cm",vor:"Spinat",nach:"–",f:"Folge V",p:"4 Jahre",h:"Winterlauch bis März im Beet.",due:"Universaldünger bei Pflanzung"},
-  {n:"Fenchel",e:"🌿",t:"haupt",tl:"Hauptkultur",s:"Mai–Juni (nicht zu früh!)",er:"August–Oktober",r:"1",a:"30 cm",ir:"20 cm",vor:"Radieschen",nach:"Zuckerhut",f:"Folge VI",p:"3 Jahre",h:"Schiesst bei Kälte.",due:"Hornspäne vor Pflanzung"},
-  {n:"Krautstiel",e:"🥬",t:"haupt",tl:"Hauptkultur",s:"April (Pflanzung)",er:"Juni–Oktober",r:"3 Pflanzen",a:"–",ir:"–",vor:"Radieschen",nach:"Zuckerhut",f:"Folge VI",p:"3 Jahre",h:"Äussere Blätter laufend schneiden.",due:"Universaldünger bei Pflanzung"},
-  {n:"Schwarzwurzeln",e:"🌑",t:"haupt",tl:"Hauptkultur",s:"April (frisches Saatgut!)",er:"Oktober–Februar",r:"3",a:"30 cm",ir:"4 cm",vor:"–",nach:"–",f:"Folge VII",p:"3 Jahre",h:"Tiefwurzler. Nach Frost süsser.",due:"Universaldünger bei Saat"},
-  {n:"Tomaten",e:"🍅",t:"haupt",tl:"Hauptkultur",s:"Mai (Jungpflanzen)",er:"Juli–Oktober",r:"6 Pflanzen",a:"–",ir:"–",vor:"–",nach:"–",f:"Fix – Beet 14",p:"4 Jahre",h:"Nach Eisheiligen pflanzen.",due:"Universaldünger alle 2 Wochen ab Juni"},
-  {n:"Pepperoni/Paprika",e:"🌶",t:"haupt",tl:"Hauptkultur",s:"Mai (Jungpflanzen)",er:"Juli–Oktober",r:"2 Pflanzen",a:"–",ir:"–",vor:"–",nach:"Winterlauch",f:"Fix – Beet 15/16",p:"4 Jahre",h:"Warmer Standort.",due:"Universaldünger alle 2 Wochen"},
-  {n:"Gurken",e:"🥒",t:"haupt",tl:"Hauptkultur",s:"Mai (Jungpflanzen)",er:"Juli–Oktober",r:"3 Pflanzen",a:"–",ir:"–",vor:"–",nach:"Winterlauch",f:"Fix – Beet 15/16",p:"4 Jahre",h:"Regelmässig giessen.",due:"Universaldünger alle 2 Wochen"},
-  {n:"Kopfsalat",e:"🥗",t:"haupt",tl:"Hauptkultur",s:"März–August (gestaffelt)",er:"April–November",r:"3",a:"25 cm",ir:"25 cm",vor:"–",nach:"Feldsalat",f:"Fix – Beet 17",p:"2 Jahre",h:"Alle 3 Wochen neu pflanzen.",due:"Universaldünger bei Pflanzung, sparsam"},
-  {n:"Feldsalat (Nüssler)",e:"🌱",t:"haupt",tl:"Hauptkultur/Winterkultur",s:"August–September",er:"Oktober–März",r:"5",a:"15 cm",ir:"5 cm",vor:"Kopfsalat",nach:"–",f:"Fix – Beet 17",p:"–",h:"Winterhart. Wenig Pflege.",due:"Kaum Düngung nötig"},
-  {n:"Spinat",e:"🌱",t:"zwischen",tl:"Vor-/Zwischenkultur",s:"Feb–März / Aug–Sept",er:"Apr–Mai / Okt–Nov",r:"5",a:"15 cm",ir:"5 cm",vor:"–",nach:"–",f:"Vor- oder Folgekultur",p:"–",h:"Frosthart -8°C.",due:"Kaum Düngung nötig"},
-  {n:"Endivien",e:"🥬",t:"zwischen",tl:"Folgekultur",s:"August (Pflanzung)",er:"Oktober–November",r:"2",a:"30 cm",ir:"25 cm",vor:"–",nach:"–",f:"Folgekultur nach Kartoffeln",p:"–",h:"Nach Frühkartoffeln. Vor Frost einbringen.",due:"Kaum Düngung nötig"},
-  {n:"Zuckerhut",e:"🥬",t:"zwischen",tl:"Folgekultur",s:"September (Pflanzung)",er:"Oktober–Dezember",r:"2",a:"30 cm",ir:"25 cm",vor:"–",nach:"–",f:"Folgekultur nach Fenchel/Krautstiel",p:"–",h:"Frosthart bis -5°C.",due:"Kaum Düngung nötig"},
-  {n:"Knoblauch",e:"🧄",t:"winter",tl:"Winterkultur",s:"September–Oktober (Stecken)",er:"Mai–Juni",r:"6",a:"15 cm",ir:"25 cm",vor:"–",nach:"–",f:"Folgekultur nach Mais/Kürbis",p:"–",h:"Überwintert problemlos.",due:"Hornspäne beim Stecken"},
-  {n:"Winterlauch",e:"🌿",t:"winter",tl:"Winterkultur/Folgekultur",s:"Oktober (Jungpflanzen)",er:"März",r:"2",a:"0 cm",ir:"10 cm",vor:"–",nach:"–",f:"Folgekultur nach Pepperoni/Gurken",p:"–",h:"Oktober pflanzen. Frosthart.",due:"Kaum Düngung nötig"},
-  {n:"Frühlingszwiebeln",e:"🌱",t:"zwischen",tl:"Vorkultur",s:"März–April",er:"Mai–Juni",r:"–",a:"–",ir:"–",vor:"–",nach:"Zwiebeln",f:"Vorkultur",p:"–",h:"8–10 Wochen Standzeit.",due:"–"},
-  {n:"Radieschen",e:"🌸",t:"zwischen",tl:"Vorkultur",s:"März–August (alle 2–3 Wo.)",er:"4–6 Wo. nach Saat",r:"5",a:"15 cm",ir:"5 cm",vor:"–",nach:"Fenchel",f:"Vorkultur",p:"–",h:"Schnellste Vorkultur.",due:"–"}
-];
-
-// ══ NAVIGATION ═══════════════════════════════════════════
-function showTab(tab,el){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('screen-'+tab).classList.add('active');
-  el.classList.add('active');
-  const subs={beete:'Gemüsegarten Marianne und Martin',kalender:'Anbaukalender 2026',tagebuch:'Journal – Alle Massnahmen',pflege:'Bewässerung & Pflege',fruchtfolge:'10-Jahres-Rotation',bibliothek:'Kultursteckbriefe',auto:'Bewässerungssteuerung'};
-  document.getElementById('hsub').textContent=subs[tab]||'';
-  document.getElementById('fabBtn').style.display=tab==='tagebuch'?'flex':'none';
-  if(tab==='pflege')renderFBars();
-  if(tab==='tagebuch'){buildJKat();buildJBeet();renderJournal();}
-  if(tab==='auto'){renderFBars();}
-}
-
-// ══ BEETE ════════════════════════════════════════════════
-function buildYrSel(){
-  const el=document.getElementById('yrSel');
-  [2026,2027,2028,2029,2030,2031].forEach((y,i)=>{
-    const b=document.createElement('button');
-    b.className='yr-btn'+(i===curYear?' active':'');
-    b.textContent=y;
-    b.onclick=()=>selYr(i,b);
-    el.appendChild(b);
-  });
-}
-function selYr(i,btn){
-  curYear=i;
-  document.querySelectorAll('.yr-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  buildGrid();
-  document.getElementById('gtitle').textContent='Gartenplan '+(BASE+i);
-}
-function buildGrid(){
-  const g=document.getElementById('beetGrid');
-  g.innerHTML='';
-  [[4,5],[6,7],[8,9],[10,11],[12,13]].forEach(([a,b])=>{
-    const row=document.createElement('div');
-    row.className='beet-row';
-    row.innerHTML=mkBeet(a)+mkBeet(b);
-    g.appendChild(row);
-  });
-}
-function mkBeet(b){
-  const d=getBD(b,curYear);
-  return '<div class="beet '+( fCls[d.folge]||'fII')+'" onclick="openBeet('+b+')"><div class="beet-nr">BEET '+b+'</div><div class="beet-k">'+d.k+'</div><div class="beet-f">Folge '+d.folge+'</div></div>';
-}
-function fmtDate(s){return s;}
-function openBeet(b){
-  let d,nr,folgeText,naechstText,bkStr;
-  if(fixBeete[b]){
-    d=fixBeete[b];nr=d.nr;
-    folgeText='Fixbeet – jedes Jahr gleich';
-    naechstText=d.k;
-    bkStr=d.bk;
-  } else {
-    d=getBD(b,curYear);nr='Beet '+b;
-    const ffJ=getFF(b,curYear);
-    const ffN=getFF(b,curYear+1);
-    folgeText='Folge '+ffJ+' – '+ffNames[ffJ];
-    naechstText='Folge '+ffN+' – '+ffNames[ffN];
-    bkStr=String(b);
-  }
-  document.getElementById('mT').textContent=nr;
-  document.getElementById('mS').textContent=d.k+' · '+(BASE+curYear);
-
-  // Pflege-Einträge für dieses Beet
-  // Präzises Beet-Matching:
-  // Eintrag mit "Alle Beete" → immer anzeigen
-  // Eintrag mit spezifischem Beet → nur wenn Beet-Nummer exakt übereinstimmt
-  // Bsp: bkStr="4" matcht "Beet 4", "Beet 4-7" aber NICHT "Beet 14" oder "Beet 40"
-  function beetMatch(beetStr){
-    if(!beetStr) return false;
-    const bs=beetStr.trim();
-    if(bs==='Alle Beete') return true;
-    // Normalisiere: "Beet 4", "Beet 4-7", "Beet 4/5", "4", "4-7", "1/2/3" etc.
-    const normalized=bs.replace(/Beet[e]?\s*/gi,'').trim();
-    // Split by / or - or , or Leerzeichen → einzelne Nummern/Ranges
-    const parts=normalized.split(/[/,\s]+/);
-    for(const part of parts){
-      // Range wie "4-7" → prüfe ob bkStr in diesem Range liegt
-      const range=part.match(/^(\d+)-(\d+)$/);
-      if(range){
-        const from=parseInt(range[1]),to=parseInt(range[2]);
-        const bNum=parseInt(bkStr);
-        if(!isNaN(bNum)&&bNum>=from&&bNum<=to) return true;
-      } else if(part.trim()===bkStr.trim()) return true;
-    }
-    return false;
-  }
-  const tbR=tbEntries.filter(e=>beetMatch(e.beet)).sort((a,c)=>a.datum.split('.').reverse().join('')-c.datum.split('.').reverse().join(''));
-  const wR=wasserLog.filter(e=>beetMatch(e.beet));
-  const sR=schutzLog.filter(e=>beetMatch(e.beet));
-  const dR=duengerLog.filter(e=>beetMatch(e.beet));
-
-  let pflHTML='';
-  if(tbR.length||wR.length||sR.length||dR.length){
-    pflHTML='<div style="margin-top:14px;border-top:2px solid var(--border);padding-top:12px">'
-      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">🌿 Pflege & Journal</div>';
-    tbR.forEach(e=>{
-      pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between"><span>'+e.emoji+' '+e.datum+' – '+e.txt+'</span>'+(e.due?'<span style="color:#92400e;font-size:11px">'+e.due+'</span>':'')+'</div>';
-    });
-    dR.forEach(e=>{
-      pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:var(--gd)">🌿 '+e.d+' – '+e.typ+'</div>';
-    });
-    wR.forEach(e=>{
-      pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:#0369a1">💧 '+e.d+' – '+e.menge+' / '+e.dauer+'</div>';
-    });
-    sR.forEach(e=>{
-      pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:#b91c1c">🐛 '+e.d+' – '+e.typ+': '+e.notiz+'</div>';
-    });
-    pflHTML+='</div>';
-  }
-
-  document.getElementById('mB').innerHTML=
-    '<div class="ir"><span class="il">🌱 Vorkultur</span><span class="iv">'+d.vor+'</span></div>'+
-    '<div class="ir"><span class="il">🌿 Hauptkultur</span><span class="iv">'+d.haupt+'</span></div>'+
-    '<div class="ir"><span class="il">🍂 Folgekultur</span><span class="iv">'+d.nach+'</span></div>'+
-    '<div class="ir"><span class="il">✂️ Erntezeit</span><span class="iv">'+d.ernte+'</span></div>'+
-    '<div class="ir"><span class="il">🔄 Aktuelle Folge</span><span class="iv">'+folgeText+'</span></div>'+
-    '<div class="ir"><span class="il">⏭ Nächstes Jahr</span><span class="iv">'+naechstText+'</span></div>'+
-    pflHTML;
-  document.getElementById('bModal').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeMo(e){
-  if(!e||e.target===document.getElementById('bModal')){
-    document.getElementById('bModal').classList.remove('open');
-    document.body.style.overflow='';
-  }
-}
-
-// ══ KALENDER ═════════════════════════════════════════════
-function kalKey(mo,idx){return mo+'_'+idx;}
-function togKalRead(idx){
-  const k=kalKey(curMonth,idx);
-  kalRead[k]=!kalRead[k];
-  buildKal();
-}
-
-function buildKal(){
-  document.getElementById('mLabel').textContent=months[curMonth-1]+' 2026';
-  const evs=kal[curMonth]||[];
-  const el=document.getElementById('kalList');
-  if(!evs.length){el.innerHTML='<div class="empty">🌨 Keine Empfehlungen in diesem Monat</div>';return;}
-
-  const groups=[
-    {key:'pflanzen',  label:'🌱 Pflanzen & Säen'},
-    {key:'ernte',     label:'✂️ Ernten'},
-    {key:'duenger',   label:'🌿 Düngung'},
-    {key:'schutz',    label:'🐛 Pflanzenschutz'},
-    {key:'bewaessern',label:'💧 Bewässerung'},
-    {key:'pflege',    label:'🛠 Pflege'},
-  ];
-
-  // Globalen Index pro Eintrag vergeben (für Checkbox-Key)
-  let globalIdx=0;
-  const pending=[], done=[];
-  groups.forEach(g=>{
-    const items=evs.filter(e=>e.t===g.key);
-    if(!items.length) return;
-    const pendItems=[], doneItems=[];
-    items.forEach(e=>{
-      const idx=globalIdx++;
-      const isRead=!!kalRead[kalKey(curMonth,idx)];
-      const entry={e,idx,isRead};
-      if(isRead) doneItems.push(entry); else pendItems.push(entry);
-    });
-    if(pendItems.length) pending.push({g,items:pendItems});
-    if(doneItems.length) done.push({g,items:doneItems});
-  });
-
-  function renderEntry(e,idx,isDone){
-    return '<div class="ke '+e.t+(isDone?' done':'')+'" style="padding-right:40px;position:relative">'
-      +'<div class="ki">'+e.i+'</div>'
-      +'<div class="kt">'
-      +'<h4>'+e.h+'</h4>'
-      +'<p>'+e.d+'</p>'
-      +'<span class="btag">'+e.b+'</span>'
-      +'</div>'
-      +'<input type="checkbox" class="ke-check" '+(isDone?'checked':'')
-      +' onchange="togKalRead('+idx+')" title="'+(isDone?'Als offen markieren':'Als erledigt markieren')+'">'
-      +'</div>';
-  }
-
-  let html='';
-  // Offene Einträge
-  pending.forEach(({g,items})=>{
-    html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:14px 0 7px">'+g.label+'</div>';
-    items.forEach(({e,idx})=>{ html+=renderEntry(e,idx,false); });
-  });
-  // Erledigte unten
-  if(done.length){
-    html+='<div class="kal-section-done">✅ Erledigt</div>';
-    done.forEach(({g,items})=>{
-      items.forEach(({e,idx})=>{ html+=renderEntry(e,idx,true); });
-    });
-  }
-
-  el.innerHTML=html;
-}
-function chM(d){curMonth=((curMonth-1+d+12)%12)+1;buildKal();}
-
-// ══ TAGEBUCH ═════════════════════════════════════════════
-function buildTbFilt(){
-  const bs=['alle','1/2/3','4-7','8/9','10','11','12','13','14','15/16','17'];
-  document.getElementById('tbFilt').innerHTML=bs.map(b=>
-    '<button class="fbtn'+(tbF===b?' active':'')+'" onclick="filtTb(\''+b+'\',this)">'+(b==='alle'?'Alle':'Beet '+b)+'</button>'
-  ).join('');
-}
-function buildTb(){
-  const el=document.getElementById('tbList');
-  const f=tbF==='alle'?tbEntries:tbEntries.filter(e=>e.beet.includes(tbF));
-  el.innerHTML=f.map(e=>
-    '<div class="te"><div class="eh"><div><div style="font-weight:700;font-size:14px">'+e.beet+'</div><div class="em">'+e.datum+'</div></div><span class="ec '+e.katC+'">'+e.emoji+' '+e.kat+'</span></div><div class="etx">'+e.txt+'</div>'+(e.due?'<div class="ed">🌿 Düngung: '+e.due+'</div>':'')+'</div>'
-  ).join('')||'<div class="empty">Keine Einträge</div>';
-}
-function filtTb(f,btn){
-  tbF=f;
-  document.querySelectorAll('#tbFilt .fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  buildTb();
-}
-function addEntry(){toast('📝 In der nativen iOS App mit Kamerazugriff verfügbar');}
-
-// ══ PFLEGE ═══════════════════════════════════════════════
-// ══ PFLANZEN ═════════════════════════════════════════════
-const pflData = {
-  "Kartoffeln":      {saat:"Februar–April",methode:"Setzen / Stecken",reihen:"2",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 4-7 (Kartoffeln)",due:"Universaldünger beim Stecken",hinweis:"Frühkartoffeln ab Juli erntbar."},
-  "Zwiebeln":        {saat:"April",methode:"Setzen / Stecken",reihen:"2",abstand:"40 cm",inReihe:"8 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger beim Stecken",hinweis:"Vorkultur: Frühlingszwiebeln im Februar."},
-  "Karotten":        {saat:"April–Juni",methode:"Säen",reihen:"2",abstand:"20 cm",inReihe:"4 cm",beet:"Beete 8-9 (Zwiebeln/Karotten)",due:"Universaldünger bei Saat",hinweis:"Gestaffelt säen alle 3 Wochen."},
-  "Auberginen":      {saat:"Ende Mai (nach Frost)",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"0 cm",inReihe:"20 cm",beet:"Beet 10 (Auberginen/Bohnen)",due:"Universaldünger bei Pflanzung",hinweis:"Anzucht Feb–März innen bei 20°C. Warmer Standort."},
-  "Buschbohnen":     {saat:"Mitte Mai–Juni",methode:"Säen",reihen:"2",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 10 (Auberginen/Bohnen)",due:"Kein Stickstoffdünger – Stickstoffsammler!",hinweis:"Nicht vor letztem Frost säen."},
-  "Kohlrabi":        {saat:"April–Juni (gestaffelt)",methode:"Jungpflanzen setzen",reihen:"1",abstand:"30 cm",inReihe:"20 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Universaldünger bei Pflanzung",hinweis:"Alle 3 Wochen neu pflanzen. Vorkultur: Spinat."},
-  "Blaukabis":       {saat:"April–Mai",methode:"Jungpflanzen setzen",reihen:"1",abstand:"50 cm",inReihe:"50 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Hornspäne vor Pflanzung",hinweis:"Anzucht Feb–März. Spätkohlsorte – frosthart."},
-  "Lauch":           {saat:"April–Mai",methode:"Jungpflanzen setzen",reihen:"2",abstand:"0 cm",inReihe:"10 cm",beet:"Beet 11 (Kohlrabi/Kabis/Lauch)",due:"Universaldünger bei Pflanzung",hinweis:"Anzucht Januar–Februar. Bleibt bis März im Beet."},
-  "Fenchel":         {saat:"Mai–Juni (nicht früher!)",methode:"Jungpflanzen setzen",reihen:"1",abstand:"30 cm",inReihe:"20 cm",beet:"Beet 12 (Fenchel/Krautstiel)",due:"Hornspäne vor Pflanzung",hinweis:"Schiesst bei Kälte – erst ab Mai! Vorkultur: Radieschen."},
-  "Krautstiel":      {saat:"April",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"–",inReihe:"–",beet:"Beet 12 (Fenchel/Krautstiel)",due:"Universaldünger bei Pflanzung",hinweis:"Äussere Blätter laufend schneiden. Vorkultur: Radieschen."},
-  "Schwarzwurzeln":  {saat:"April",methode:"Säen",reihen:"3",abstand:"30 cm",inReihe:"4 cm",beet:"Beet 13 (Schwarzwurzeln)",due:"Universaldünger bei Saat",hinweis:"Frisches Saatgut verwenden! Tiefwurzler."},
-  "Mais":            {saat:"Mitte Mai",methode:"Säen",reihen:"3",abstand:"30 cm",inReihe:"10 cm",beet:"Beete 1-3",due:"Universaldünger bei Saat",hinweis:"In Blöcken 3×3 säen – Windbestäubung!"},
-  "Zucchetti":       {saat:"Mai (vorgez. ab April)",methode:"Jungpflanzen setzen",reihen:"2 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 1-3",due:"Kompost / Universaldünger",hinweis:"Nach letztem Frost pflanzen. Klein ernten."},
-  "Kürbis":          {saat:"Mai (vorgez. ab April)",methode:"Jungpflanzen setzen",reihen:"2 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 1-3",due:"Kompost",hinweis:"Bodendecker. Ernte wenn Stiel verkorkt."},
-  "Tomaten":         {saat:"Mai (nach Eisheiligen)",methode:"Jungpflanzen setzen",reihen:"6 Pflanzen",abstand:"–",inReihe:"–",beet:"Beet 14 (Tomaten)",due:"Universaldünger alle 2 Wochen ab Juni",hinweis:"Anzucht Feb–März. Beet 14 fix."},
-  "Pepperoni":       {saat:"Mai",methode:"Jungpflanzen setzen",reihen:"2 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Universaldünger alle 2 Wochen",hinweis:"Warmer Standort. Anzucht Feb–März."},
-  "Paprika":         {saat:"Mai",methode:"Jungpflanzen setzen",reihen:"1 Pflanze",abstand:"–",inReihe:"–",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Universaldünger alle 2 Wochen",hinweis:"Wie Pepperoni – warmer Standort."},
-  "Gurken":          {saat:"Mai",methode:"Jungpflanzen setzen",reihen:"3 Pflanzen",abstand:"–",inReihe:"–",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Universaldünger alle 2 Wochen",hinweis:"Regelmässig giessen. Klein ernten."},
-  "Kopfsalat":       {saat:"März–August (gestaffelt)",methode:"Jungpflanzen setzen",reihen:"3",abstand:"25 cm",inReihe:"25 cm",beet:"Beet 17 (Salat)",due:"Universaldünger bei Pflanzung, sparsam",hinweis:"Alle 3 Wochen neu pflanzen für laufende Ernte."},
-  "Feldsalat":       {saat:"August–September",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beet 17 (Salat)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Wenig Pflege. Ernte Oktober–März."},
-  "Knoblauch":       {saat:"September–Oktober",methode:"Setzen / Stecken",reihen:"6",abstand:"15 cm",inReihe:"25 cm",beet:"Beete 1-3",due:"Hornspäne beim Stecken",hinweis:"5 cm tief stecken. Überwintert. Ernte Mai–Juni."},
-  "Winterlauch":     {saat:"Oktober",methode:"Jungpflanzen setzen",reihen:"2",abstand:"0 cm",inReihe:"10 cm",beet:"Beete 15-16 (Pepperoni/Gurken)",due:"Kaum Düngung nötig",hinweis:"Nach Pepperoni/Gurken-Ernte pflanzen. Frosthart."},
-  "Spinat":          {saat:"Feb–März / Aug–Sept",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 6/7/11 (Vorkultur)",due:"Kaum Düngung",hinweis:"Frosthart –8°C. Schnellste Vorkultur."},
-  "Nüssler":         {saat:"August–September",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 4-7 (nach Kartoffeln)",due:"Kaum Düngung nötig",hinweis:"Winterhart. Nach Kartoffelernte direkt säen."},
-  "Endivien":        {saat:"August (Pflanzung)",methode:"Jungpflanzen setzen",reihen:"2",abstand:"30 cm",inReihe:"25 cm",beet:"Beete 4-7 (nach Kartoffeln)",due:"Kaum Düngung",hinweis:"Nach Frühkartoffeln. Vor Frost einbringen."},
-  "Zuckerhut":       {saat:"September (Pflanzung)",methode:"Jungpflanzen setzen",reihen:"2",abstand:"30 cm",inReihe:"25 cm",beet:"Beet 12 (nach Fenchel)",due:"Kaum Düngung",hinweis:"Frosthart bis –5°C. Ernte bis Dezember."},
-  "Frühlingszwiebeln":{saat:"März–April",methode:"Säen",reihen:"–",abstand:"–",inReihe:"–",beet:"Beete 8-9 (Vorkultur)",due:"–",hinweis:"8–10 Wochen Standzeit. Vor Zwiebeln/Karotten."},
-  "Radieschen":      {saat:"März–August",methode:"Säen",reihen:"5",abstand:"15 cm",inReihe:"5 cm",beet:"Beete 12/13 (Vorkultur)",due:"–",hinweis:"4–6 Wochen bis Ernte. Vor Fenchel/Krautstiel."},
 };
 
 
@@ -990,11 +962,13 @@ function getFruchtfolgeVorschlag(kulturName) {
 function pflanzEintr() {
   const k = document.getElementById('pflKultur').value;
   if (!k) { toast('⚠️ Bitte Kultur wählen'); return; }
-  const beet = document.getElementById('pflBeet').value;
+  const beet    = document.getElementById('pflBeet').value;
   const methode = document.getElementById('pflMethode').value;
-  const entry = {d:nowStr(), k, beet, methode, due: pflData[k]?pflData[k].due:''};
+  const notiz   = document.getElementById('pflNotiz')?.value.trim()||'';
+  const entry = {d:nowStr(), k, beet, methode, due: pflData[k]?pflData[k].due:'', notiz};
   pflLog.unshift(entry);
   newPflLog.unshift(entry);
+  if(document.getElementById('pflNotiz')) document.getElementById('pflNotiz').value='';
   renderPflLog();
   renderJournal();
   toast('✅ Pflanzung eingetragen: ' + k);
@@ -1020,6 +994,122 @@ function delPfl(i) {
   renderPflLog(); renderJournal(); toast('🗑 Gelöscht');
 }
 
+// ══ WASSERTANK ═══════════════════════════════════════════
+let tankLiter    = 325;
+let tankKap      = 500;
+let tankAlarmPct = 20;
+let tankBefuelltAm = '';
+
+const tankSteps   = [50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200,1500,2000];
+const tankKapOpts = [200,300,500,750,1000,1200,1500,2000,3000,5000];
+const alarmOpts   = [10,15,20,25,30];
+let tankI    = 5;  // 325L
+let tankKapI = 2;  // 500L
+let alarmI   = 2;  // 20%
+
+function tankPct() { return Math.round(tankLiter / tankKap * 100); }
+
+function tankStatusInfo(pct) {
+  if (pct >= 70) return { text: '✅ Ausreichend', color: '#16a34a' };
+  if (pct >= tankAlarmPct + 10) return { text: '🟡 Mittel', color: '#d97706' };
+  if (pct >= tankAlarmPct) return { text: '⚠️ Niedrig', color: '#ea580c' };
+  return { text: '🔴 ALARM – Tank fast leer!', color: '#dc2626' };
+}
+
+function renderTank() {
+  const pct = tankPct();
+  const info = tankStatusInfo(pct);
+  // Füll-Balken
+  const fill = document.getElementById('tankFill');
+  const pctEl = document.getElementById('tankPct');
+  const literEl = document.getElementById('tankLiter');
+  const kapEl = document.getElementById('tankKapLabel');
+  const statusEl = document.getElementById('tankStatus');
+  const sliderEl = document.getElementById('tankSlider');
+  const kapValEl = document.getElementById('tankKapVal');
+  const alarmValEl = document.getElementById('tankAlarmVal');
+  const hinweisEl = document.getElementById('tankHinweis');
+  if (!fill) return;
+  fill.style.height = Math.max(3, pct) + '%';
+  // Farbe je Füllstand
+  if (pct >= 60) fill.style.background = 'linear-gradient(to top,#0ea5e9,#7dd3fc)';
+  else if (pct >= tankAlarmPct + 10) fill.style.background = 'linear-gradient(to top,#f59e0b,#fcd34d)';
+  else fill.style.background = 'linear-gradient(to top,#ef4444,#fca5a5)';
+  pctEl.textContent = pct + '%';
+  literEl.textContent = tankLiter + ' L';
+  kapEl.textContent = tankKap + ' L';
+  statusEl.textContent = info.text;
+  statusEl.style.color = info.color;
+  sliderEl.textContent = tankLiter + ' L';
+  kapValEl.textContent = tankKap + ' L';
+  alarmValEl.textContent = tankAlarmPct + '%';
+  // Hinweis-Box
+  if (pct <= tankAlarmPct && document.getElementById('tankAlarmT').checked) {
+    hinweisEl.style.background = '#fee2e2';
+    hinweisEl.style.color = '#991b1b';
+    hinweisEl.textContent = '⚠️ Tank fast leer! Bitte Tank befüllen bevor die nächste Bewässerung läuft.';
+  } else {
+    hinweisEl.style.background = 'var(--gp)';
+    hinweisEl.style.color = 'var(--gd)';
+    hinweisEl.textContent = '💡 Tank befüllen: Regenwasser bevorzugt. Leitungswasser vor Einsatz 24h stehen lassen (Chlor entgast).';
+  }
+  // Auch in localStorage speichern
+  storeSave('tf_tank', {tankLiter, tankKap, tankAlarmPct, tankBefuelltAm});
+}
+
+function chTank(d) {
+  // Finde nächsten Step
+  let idx = tankSteps.findIndex(v => v >= tankLiter);
+  if (idx === -1) idx = tankSteps.length - 1;
+  idx = Math.max(0, Math.min(tankSteps.length-1, idx + d));
+  tankLiter = tankSteps[idx];
+  if (tankLiter > tankKap) tankLiter = tankKap;
+  renderTank();
+}
+function chTankKap(d) {
+  tankKapI = Math.max(0, Math.min(tankKapOpts.length-1, tankKapI + d));
+  tankKap = tankKapOpts[tankKapI];
+  if (tankLiter > tankKap) tankLiter = tankKap;
+  renderTank();
+}
+function chTankAlarm(d) {
+  alarmI = Math.max(0, Math.min(alarmOpts.length-1, alarmI + d));
+  tankAlarmPct = alarmOpts[alarmI];
+  renderTank();
+}
+function saveTankBefuellung() {
+  const val = document.getElementById('tankBefuellung').value;
+  if (!val) return;
+  tankBefuelltAm = val;
+  const [y,m,d] = val.split('-');
+  document.getElementById('tankBefuellungLabel').textContent = 'Befüllt am: ' + d + '.' + m + '.' + y;
+  renderTank();
+  toast('✅ Befüllung gespeichert');
+}
+
+function loadTank() {
+  const saved = storeLoad('tf_tank', null);
+  if (saved) {
+    tankLiter = saved.tankLiter || 650;
+    tankKap   = saved.tankKap   || 1000;
+    tankAlarmPct = saved.tankAlarmPct || 20;
+    tankBefuelltAm = saved.tankBefuelltAm || '';
+    // Sync indices
+    tankKapI = tankKapOpts.findIndex(v => v >= tankKap);
+    if (tankKapI === -1) tankKapI = 4;
+    alarmI = alarmOpts.findIndex(v => v >= tankAlarmPct);
+    if (alarmI === -1) alarmI = 2;
+    // Befüllung Label
+    if (tankBefuelltAm) {
+      const [y,m,d] = tankBefuelltAm.split('-');
+      const el = document.getElementById('tankBefuellungLabel');
+      if (el) el.textContent = 'Befüllt am: ' + d + '.' + m + '.' + y;
+      const inp = document.getElementById('tankBefuellung');
+      if (inp) inp.value = tankBefuelltAm;
+    }
+  }
+}
+
 function togAuto(){const on=document.getElementById('autoT').checked;document.getElementById('naxt').textContent=on?'Morgen 07:00':'Manuell';toast(on?'💧 Automatik ein':'🔴 Automatik aus');}
 function chFr(d){frI=Math.max(0,Math.min(frO.length-1,frI+d));document.getElementById('frV').textContent=frO[frI];}
 function chDa(d){daI=Math.max(0,Math.min(daO.length-1,daI+d));document.getElementById('daV').textContent=daO[daI];}
@@ -1028,6 +1118,7 @@ function chWL(d){wLI=Math.max(0,Math.min(wLO.length-1,wLI+d));document.getElemen
 function chWM(d){wMI=Math.max(0,Math.min(wMO.length-1,wMI+d));document.getElementById('wasserMin').textContent=wMO[wMI];}
 
 function renderFBars(){
+  renderTank();
   const data=[{b:'Beete 1–3',p:65,c:'#22c55e'},{b:'Beete 4–7',p:40,c:'#f59e0b'},{b:'Beete 8–9',p:75,c:'#22c55e'},{b:'Beet 14',p:30,c:'#ef4444'},{b:'Beet 17 (Salat)',p:80,c:'#22c55e'}];
   document.getElementById('fBars').innerHTML=data.map(b=>
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:12px;min-width:100px;color:var(--muted)">'+b.b+'</span><div class="pb"><div class="pbf" style="width:'+b.p+'%;background:'+b.c+'"></div></div><span style="font-size:12px;font-weight:600;min-width:32px">'+b.p+'%</span></div>'
@@ -1041,9 +1132,13 @@ function logRow(txt,delFn,i){
 
 // Düngung
 function duengeEintr(){
-  const typ=document.getElementById('dTyp').value,beet=document.getElementById('dBeet').value;
-  duengerLog.unshift({d:nowStr(),beet,typ});
-  renderDLog();renderJournal();toast('✅ Düngergabe: '+typ);
+  const typ=document.getElementById('dTyp').value;
+  const kultur=document.getElementById('dKultur')?.value||'';
+  const beet=document.getElementById('dBeet').value;
+  const notiz=document.getElementById('dNotiz')?.value.trim()||'';
+  duengerLog.unshift({d:nowStr(),beet,typ,kultur,notiz});
+  if(document.getElementById('dNotiz')) document.getElementById('dNotiz').value='';
+  renderDLog();renderJournal();toast('✅ Düngergabe: '+(kultur?kultur+' · ':'')+typ);
 }
 function delDLog(i){duengerLog.splice(i,1);renderDLog();renderJournal();toast('🗑 Gelöscht');}
 function renderDLog(){
@@ -1057,12 +1152,14 @@ function renderDLog(){
 
 // Pflanzenschutz
 function schutzEintr(){
-  const typ=document.getElementById('schutzTyp').value,beet=document.getElementById('schutzBeet').value;
+  const typ=document.getElementById('schutzTyp').value;
+  const kultur=document.getElementById('schutzKultur')?.value||'';
+  const beet=document.getElementById('schutzBeet').value;
   const notiz=document.getElementById('schutzNotiz').value.trim();
   if(!notiz){toast('⚠️ Bitte Was-konkret ausfüllen');return;}
-  schutzLog.unshift({d:nowStr(),beet,typ,notiz});
+  schutzLog.unshift({d:nowStr(),beet,typ,notiz,kultur});
   document.getElementById('schutzNotiz').value='';
-  renderSchutzLog();renderJournal();toast('✅ Massnahme: '+typ);
+  renderSchutzLog();renderJournal();toast('✅ Massnahme: '+(kultur?kultur+' · ':'')+typ);
 }
 function delSchutz(i){schutzLog.splice(i,1);renderSchutzLog();renderJournal();toast('🗑 Gelöscht');}
 function renderSchutzLog(){
@@ -1076,9 +1173,12 @@ function renderSchutzLog(){
 
 // Bewässerung
 function wasserEintr(){
+  const kultur=document.getElementById('wasserKultur')?.value||'';
   const beet=document.getElementById('wasserBeet').value;
-  wasserLog.unshift({d:nowStr(),beet,menge:wLO[wLI],dauer:wMO[wMI]});
-  renderWasserLog();renderJournal();toast('✅ Bewässerung eingetragen');
+  const notiz=document.getElementById('wasserNotiz')?.value.trim()||'';
+  wasserLog.unshift({d:nowStr(),beet,menge:wLO[wLI],dauer:wMO[wMI],kultur,notiz});
+  if(document.getElementById('wasserNotiz')) document.getElementById('wasserNotiz').value='';
+  renderWasserLog();renderJournal();toast('✅ Bewässerung: '+(kultur?kultur+' · ':'')+wLO[wLI]);
 }
 function delWasser(i){wasserLog.splice(i,1);renderWasserLog();renderJournal();toast('🗑 Gelöscht');}
 function renderWasserLog(){
@@ -1226,21 +1326,20 @@ function matchBeet(beetStr, key){
 
 function getAllJournalEntries(){
   const all=[];
-  // Pflanzungen/Saaten
+  // Pflanzungen/Saaten – mit Kultur + Notiz
   pflLog.forEach(e=>{
-    all.push({d:e.d, kat:'pflanzen', i:'🌱', titel:e.k+' – '+e.methode, detail:e.beet, extra:e.due?'🌿 '+e.due:''});
-    // Grunddüngung beim Pflanzen: erscheint AUCH unter Düngung-Filter
-    if(e.due) all.push({d:e.d, kat:'duenger', i:'🌿', titel:'Grunddüngung: '+e.due+' ('+e.k+')', detail:e.beet, extra:''});
+    all.push({d:e.d, kat:'pflanzen', i:'🌱', kultur:e.k, titel:e.methode, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''});
+    if(e.due) all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.k, titel:'Grunddüngung: '+e.due, detail:e.beet, extra:'', notiz:''});
   });
-  // Manuelle Düngergaben
-  duengerLog.forEach(e=>all.push({d:e.d, kat:'duenger', i:'🌿', titel:'Düngung: '+e.typ, detail:e.beet, extra:''}));
-  // Bewässerung
-  wasserLog.forEach(e=> all.push({d:e.d,    kat:'wasser',   i:'💧', titel:'Bewässerung: '+e.menge+' / '+e.dauer, detail:e.beet, extra:''}));
-  // Pflanzenschutz
-  schutzLog.forEach(e=> all.push({d:e.d,    kat:'schutz',   i:'🐛', titel:e.typ,               detail:e.beet, extra:e.notiz}));
-  // Freihand-Journaleinträge (Beobachtungen, Ernte, etc.)
-  tbEntries.forEach(e=> all.push({d:e.datum, kat:'journal',  i:e.emoji, titel:e.txt,            detail:e.beet, extra:e.due?'🌿 '+e.due:''}));
-  // Sortieren nach Datum absteigend
+  // Düngergaben – mit Kultur + Notiz
+  duengerLog.forEach(e=>all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.kultur||'', titel:'Düngung: '+e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  // Bewässerung – mit Kultur + Notiz
+  wasserLog.forEach(e=> all.push({d:e.d, kat:'wasser',  i:'💧', kultur:e.kultur||'', titel:'Bewässerung: '+e.menge+' / '+e.dauer, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  // Pflanzenschutz – mit Kultur + Notiz
+  schutzLog.forEach(e=> all.push({d:e.d, kat:'schutz',  i:'🐛', kultur:e.kultur||'', titel:e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  // Journal-Freieinträge
+  tbEntries.forEach(e=> all.push({d:e.datum, kat:'journal', i:e.emoji, kultur:e.kultur||'', titel:e.txt, detail:e.beet, extra:e.due||'', notiz:e.due||''}));
+  // Sortieren absteigend
   all.sort((a,b)=>{
     const pa=a.d.split('.').reverse().join('');
     const pb=b.d.split('.').reverse().join('');
@@ -1259,35 +1358,159 @@ function renderJournal(){
     return katOk && beetOk;
   });
   if(!filtered.length){
-    el.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;text-align:center">Keine Einträge</div>';
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Keine Einträge</div>';
     return;
   }
   // Gruppiere nach Monat
   const byMonth={};
   filtered.forEach(e=>{
     const parts=e.d.split('.');
-    const key=parts[1]+'.'+parts[2]; // mm.yyyy
-    const label=months[parseInt(parts[1])-1]+' '+parts[2];
+    const key=(parts[2]||'2026')+(parts[1]||'01').padStart(2,'0');
+    const label=months[parseInt(parts[1]||1)-1]+' '+(parts[2]||'2026');
     if(!byMonth[key]) byMonth[key]={label,items:[]};
     byMonth[key].items.push(e);
   });
+  const borderCol={pflanzen:'#22c55e',duenger:'#a16207',wasser:'#0ea5e9',schutz:'#ef4444',journal:'#ec4899'};
+  const katLabel={pflanzen:'🌱 Pflanzung',duenger:'🌿 Düngung',wasser:'💧 Bewässerung',schutz:'🐛 Schutz',journal:'📓 Journal'};
+  const katCls={pflanzen:'th',duenger:'tz',wasser:'th',schutz:'tw',journal:'th'};
   let html='';
   Object.keys(byMonth).sort((a,b)=>b.localeCompare(a)).forEach(mo=>{
     const grp=byMonth[mo];
-    html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:12px 0 6px">'+grp.label+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:14px 0 6px">'+grp.label+'</div>';
     grp.items.forEach(e=>{
-      const clsMap={pflanzen:'pflanzen',duenger:'duenger',wasser:'bewaessern',schutz:'schutz',journal:'pflege'};
-      html+='<div class="ke '+(clsMap[e.kat]||'pflege')+'">'
-        +'<div class="ki">'+e.i+'</div>'
-        +'<div class="kt">'
-        +'<h4>'+e.d+' – '+e.titel+'</h4>'
-        +(e.detail?'<p>'+e.detail+'</p>':'')
-        +(e.extra?'<span class="dtag">'+e.extra+'</span>':'')
-        +'</div></div>';
+      const bc=borderCol[e.kat]||'#888';
+      const kl=katLabel[e.kat]||e.kat;
+      const kc=katCls[e.kat]||'th';
+      const beet=(e.detail||'').replace(/ \(.*?\)/g,'').trim();
+      html+='<div class="te" style="border-left:3px solid '+bc+';margin-bottom:8px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<span style="font-size:12px;color:var(--muted);font-weight:500">'+e.d+'</span>'
+        +'<span class="ec '+kc+'">'+kl+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:72px 1fr;gap:3px 8px;font-size:13px">'
+        +(e.kultur?'<span style="color:var(--muted);font-size:11px;padding-top:1px">Kultur</span><span style="font-weight:600">'+e.kultur+'</span>':'')
+        +'<span style="color:var(--muted);font-size:11px;padding-top:1px">Massnahme</span><span style="font-weight:500">'+e.titel+'</span>'
+        +(beet?'<span style="color:var(--muted);font-size:11px;padding-top:1px">Beet</span><span style="font-weight:500">'+beet+'</span>':'')
+        +((e.notiz||e.extra)?'<span style="color:var(--muted);font-size:11px;padding-top:1px">Notiz</span><span style="color:#555;font-size:12px">'+(e.notiz||e.extra)+'</span>':'')
+        +'</div>'
+        +'</div>';
     });
   });
   el.innerHTML=html;
 }
+
+// ════════════════════════════════════════════════════════════
+// KALENDER: Gemüse-Filter
+// ════════════════════════════════════════════════════════════
+let kalGemuese = 'alle';
+const kalGemueseList = [
+  'alle','Tomaten','Zucchetti','Kürbis','Mais','Kartoffeln','Zwiebeln','Karotten',
+  'Auberginen','Buschbohnen','Kohlrabi','Blaukabis','Lauch','Fenchel','Krautstiel',
+  'Schwarzwurzeln','Pepperoni','Gurken','Kopfsalat','Feldsalat','Knoblauch'
+];
+
+function buildKalGemuese(){
+  const el=document.getElementById('kalGemueseRow');
+  if(!el) return;
+  el.innerHTML=kalGemueseList.map(g=>
+    '<button class="fbtn'+(kalGemuese===g?' active':'')+'" onclick="setKalGemuese(this)" data-g="'+g+'" style="flex-shrink:0">'+(g==='alle'?'Alle':g)+'</button>'
+  ).join('');
+}
+function setKalGemuese(btn){
+  kalGemuese=btn.dataset.g;
+  document.querySelectorAll('#kalGemueseRow .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildKal();
+}
+
+// ════════════════════════════════════════════════════════════
+// PFLEGE: Auto-Beet je Kultur-Wahl (Düngung, Schutz, Wasser)
+// ════════════════════════════════════════════════════════════
+function kulturToBeet(k){
+  const map={
+    'Kartoffeln':'Beete 4-7 (Kartoffeln)',
+    'Zwiebeln':'Beete 8-9 (Zwiebeln/Karotten)',
+    'Karotten':'Beete 8-9 (Zwiebeln/Karotten)',
+    'Auberginen':'Beet 10 (Auberginen/Bohnen)',
+    'Buschbohnen':'Beet 10 (Auberginen/Bohnen)',
+    'Kohlrabi':'Beet 11 (Kohlrabi/Kabis/Lauch)',
+    'Blaukabis':'Beet 11 (Kohlrabi/Kabis/Lauch)',
+    'Lauch':'Beet 11 (Kohlrabi/Kabis/Lauch)',
+    'Fenchel':'Beet 12 (Fenchel/Krautstiel)',
+    'Krautstiel':'Beet 12 (Fenchel/Krautstiel)',
+    'Schwarzwurzeln':'Beet 13 (Schwarzwurzeln)',
+    'Mais':'Beete 1-3','Zucchetti':'Beete 1-3','Kürbis':'Beete 1-3',
+    'Knoblauch':'Beete 1-3','Tomaten':'Beet 14 (Tomaten)',
+    'Pepperoni':'Beete 15-16 (Pepperoni/Gurken)',
+    'Paprika':'Beete 15-16 (Pepperoni/Gurken)',
+    'Gurken':'Beete 15-16 (Pepperoni/Gurken)',
+    'Kopfsalat':'Beet 17 (Salat)','Feldsalat':'Beet 17 (Salat)',
+    'Nüssler':'Beet 17 (Salat)',
+    'Winterlauch':'Beete 15-16 (Pepperoni/Gurken)',
+  };
+  return map[k]||'Alle Beete';
+}
+function autoSetSelectBeet(selectId, kulturId){
+  const k=document.getElementById(kulturId)?.value;
+  const sel=document.getElementById(selectId);
+  if(!sel||!k) return;
+  const target=kulturToBeet(k);
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===target||sel.options[i].text===target){sel.selectedIndex=i;break;}
+  }
+}
+function autoSetDBeet()    { autoSetSelectBeet('dBeet','dKultur'); }
+function autoSetSchutzBeet(){ autoSetSelectBeet('schutzBeet','schutzKultur'); }
+function autoSetWasserBeet(){ autoSetSelectBeet('wasserBeet','wasserKultur'); }
+
+// ════════════════════════════════════════════════════════════
+// JOURNAL: Export als CSV (Excel-kompatibel)
+// ════════════════════════════════════════════════════════════
+function exportJournal(){
+  const entries = getAllJournalEntries();
+  if(!entries.length){ toast('📓 Keine Einträge zum Exportieren'); return; }
+
+  // BOM für Excel-UTF8-Kompatibilität
+  const BOM = '\uFEFF';
+  const sep = ';';
+  const header = ['Datum','Kultur','Massnahme','Notiz','Beet-Nr','Kategorie'].join(sep);
+
+  const rows = entries.map(e=>{
+    const datum  = e.d||'';
+    const kultur = e.kultur||e.k||'';
+    const massn  = e.titel||'';
+    const notiz  = (e.extra||e.notiz||'').replace(/🌿 /g,'');
+    const beet   = (e.detail||'').replace(/Beet[e]?\s*/i,'').replace(/ \(.*\)/,'').trim();
+    const kat    = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Bewässerung',schutz:'Pflanzenschutz',journal:'Journal'}[e.kat]||e.kat||'';
+    // Felder mit Semikolon oder Newlines in Quotes
+    const q = s => (s.includes(sep)||s.includes('\n')||s.includes('"')) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    return [datum,kultur,massn,notiz,beet,kat].map(q).join(sep);
+  });
+
+  const csv = BOM + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+
+  // Dateiname: YYYYMMDD_2026_Gartenjournal.csv
+  const now  = new Date();
+  const ds   = now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+  const fname = ds+'_2026_Gartenjournal.csv';
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast('✅ Export: '+fname+' ('+entries.length+' Einträge)');
+}
+
+// ════════════════════════════════════════════════════════════
+// JOURNAL: renderJournal mit Datum/Kultur/Massnahme/Notiz/Beet
+// (ersetzt bestehende renderJournal-Funktion)
+// ════════════════════════════════════════════════════════════
 
 // ══ TOAST ════════════════════════════════════════════════
 function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
@@ -1362,7 +1585,9 @@ togKalRead   = function(i){ _origTogKalRead(i); saveAll(); };
 
 // ══ INIT ═════════════════════════════════════════════════
 loadAll();
-buildYrSel();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
+loadTank();
+buildYrSel();
+buildKalGemuese();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
 renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
 buildJKat();buildJBeet();renderJournal();
 </script>
