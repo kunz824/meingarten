@@ -579,6 +579,81 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     </div>
   </div>
 
+  <!-- TEMPERATURSENSOR -->
+  <div class="pt">🌡 Temperatursensor</div>
+  <div class="pc">
+    <!-- Aktuelle Temperatur -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div style="background:#fef3c7;border-radius:12px;padding:10px;text-align:center;grid-column:span 1">
+        <div id="tempAktuell" style="font-size:22px;font-weight:800;color:#92400e">–</div>
+        <div style="font-size:10px;color:#92400e;font-weight:600;margin-top:2px">°C aktuell</div>
+      </div>
+      <div style="background:#fee2e2;border-radius:12px;padding:10px;text-align:center">
+        <div id="tempMax" style="font-size:22px;font-weight:800;color:#b91c1c">–</div>
+        <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-top:2px">°C Max heute</div>
+      </div>
+      <div style="background:#dbeafe;border-radius:12px;padding:10px;text-align:center">
+        <div id="tempMin" style="font-size:22px;font-weight:800;color:#1e40af">–</div>
+        <div style="font-size:10px;color:#1e40af;font-weight:600;margin-top:2px">°C Min heute</div>
+      </div>
+    </div>
+    <!-- Alarm-Banner -->
+    <div id="tempAlarmBanner" style="display:none;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:10px"></div>
+    <!-- Letzte Messung -->
+    <div class="pr">
+      <div class="prl">📅 Letzte Messung</div>
+      <div class="prv" id="tempLetzt">–</div>
+    </div>
+    <!-- Alarmgrenzen -->
+    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">⚠️ Alarmgrenzen</div>
+      <div class="pr">
+        <div class="prl">🥶 Min-Alarm bei</div>
+        <div class="step">
+          <button onclick="chTempAlarmMin(-1)">−</button>
+          <span id="tempAlarmMinVal" style="min-width:46px;text-align:center">5 °C</span>
+          <button onclick="chTempAlarmMin(1)">+</button>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="prl">🥵 Max-Alarm bei</div>
+        <div class="step">
+          <button onclick="chTempAlarmMax(-1)">−</button>
+          <span id="tempAlarmMaxVal" style="min-width:46px;text-align:center">35 °C</span>
+          <button onclick="chTempAlarmMax(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <!-- Manuell erfassen -->
+    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📝 Temperatur manuell erfassen</div>
+      <div class="pr">
+        <div class="prl">🌡 Wert (°C)</div>
+        <div class="step">
+          <button onclick="chTempWert(-1)">−</button>
+          <span id="tempWertVal" style="min-width:52px;text-align:center">20.0 °C</span>
+          <button onclick="chTempWert(1)">+</button>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="prl">📅 Datum</div>
+        <input type="date" id="tempDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)">
+      </div>
+      <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <div class="prl">📝 Notiz</div>
+        <textarea class="ni" id="tempNotiz" rows="2" placeholder="z.B. Frostnacht, Hitzewelle…"></textarea>
+      </div>
+      <button class="sbtn" onclick="tempEintr()">✅ Temperatur eintragen</button>
+    </div>
+    <!-- Historie -->
+    <div class="dlog" id="tempLogEl" style="margin-top:10px"></div>
+    <!-- Hinweis -->
+    <div style="margin-top:10px;background:#fef3c7;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;line-height:1.6">
+      🌡 <b>Sensor:</b> DS18B20 oder DHT22 (ESP32, separater Eingang).<br>
+      Autonomer Betrieb – beeinflusst die Bewässerungslogik <b>nicht</b>. Dient nur der Überwachung (Frost-/Hitzealarm).
+    </div>
+  </div>
+
   <div class="pt">🌡 Sensoren & Status</div>
   <div class="pc">
     <div class="pr"><div class="prl">🌧 Regensensor</div>
@@ -605,6 +680,8 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       <label class="ts"><input type="checkbox" id="notifS" checked><span class="tsl"></span></label></div>
     <div class="pr"><div class="prl">🪣 Tank unter Alarmgrenze</div>
       <label class="ts"><input type="checkbox" id="notifTank" checked><span class="tsl"></span></label></div>
+    <div class="pr"><div class="prl">🌡 Temperatur-Alarm</div>
+      <label class="ts"><input type="checkbox" id="notifTemp" checked><span class="tsl"></span></label></div>
   </div>
 </div>
 
@@ -936,11 +1013,10 @@ const kal={
     {t:"pflanzen",  g:"Auberginen",     i:"🍆",kat:"Pflanzen",      h:"Auberginen: pflanzen",                   d:"Methode: Jungpflanzen setzen. Wärmsten Standort, Windschutz wichtig.",                             b:"Beet 10"},
     {t:"pflanzen",  g:"Buschbohnen",    i:"🫘",kat:"Pflanzen",      h:"Buschbohnen: säen",                     d:"Methode: Säen. 2 Reihen, 30cm Abstand, 4cm tief. Nicht vor 12°C Bodentemperatur.",                  b:"Beet 10"},
     {t:"pflanzen",  g:"Lauch",          i:"🌿",kat:"Pflanzen",      h:"Blaukabis/Lauch/Fenchel/Krautstiel",    d:"Methode: Jungpflanzen setzen. Abstände einhalten.",                                                b:"Beet 11, 12"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: Universaldünger bei Pflanzung", d:"Produkt: GROW by OBI BIO UF. Menge: 100g/m² oder 1 Handvoll/Pflanzloch.",                         b:"Beet 14"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: Düngung bei Pflanzung",         d:"Bei Pflanzung: GROW by OBI BIO UF, 100g/m² oder 1 Handvoll/Pflanzloch. 2–3 Wochen danach: Brennesseljauche (Gesal Extrakt 1:10), 1–2L/Pflanze.", b:"Beet 14"},
     {t:"duenger",   g:"Pepperoni",      i:"🌿",kat:"Düngung",       h:"Pepperoni/Gurken: Grunddüngung",         d:"Produkt: GROW by OBI BIO UF. Menge: 80g/m². Alt.: 100g/m² Hühnermist 2 Wo. vorher.",              b:"Beete 15,16"},
-    {t:"duenger",   g:"Auberginen",     i:"🌿",kat:"Düngung",       h:"Auberginen: Hornspäne + Universaldünger", d:"Produkt: Hornspäne 80g/m² bei Pflanzung + UF 60g/m² nach 3 Wochen.",                            b:"Beet 10"},
+    {t:"duenger",   g:"Auberginen",     i:"🌿",kat:"Düngung",       h:"Auberginen: Düngung bei Pflanzung",      d:"Bei Pflanzung: Hornspäne 80g/m² + UF 60g/m² nach 3 Wochen. 2–3 Wochen nach Pflanzung zusätzlich: Brennesseljauche (Gesal Extrakt 1:10), 1–2L/Pflanze.", b:"Beet 10"},
     {t:"duenger",   g:"Mais",           i:"🌿",kat:"Düngung",       h:"Mais/Zucchetti/Kürbis: Kompost + Hühnermist", d:"Produkt: Bio Capito Kompost 3kg/m² + Hühnermist 100g/m². Extreme Starkzehrer!",              b:"Beete 1–3"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten/Auberginen: Brennesseljauche 1. Gabe", d:"Produkt: Gesal Extrakt 1:10. Menge: 1–2L/Pflanze. 2–3 Wochen nach Pflanzung.",              b:"Beet 14, Beet 10"},
     {t:"schutz",    g:"Alle",           i:"🐛",kat:"Pflanzenschutz",h:"Alle Jungpflanzen: Schneckenschutz",    d:"Schneckenkörner um alle Beete. Jungpflanzen extrem gefährdet!",                                   b:"Alle Beete"},
     {t:"bewaessern",g:"Tomaten",        i:"💧",kat:"Bewässerung",   h:"Alle Neupflanzungen: täglich angiessen", d:"1–2 Wochen täglich bis eingewurzelt. Dann 2–3×/Woche.",                                          b:"Alle Neupflanzungen"},
   ],
@@ -948,8 +1024,7 @@ const kal={
     {t:"ernte",     g:"Kopfsalat",      i:"✂️",kat:"Ernte",         h:"Kopfsalat: laufend ernten",              d:"Wenn Kopf fest. Vor Schossen ernten – Wärme beschleunigt es!",                                    b:"Beet 17"},
     {t:"ernte",     g:"Kohlrabi",       i:"✂️",kat:"Ernte",         h:"Kohlrabi: erste Ernte",                  d:"Wenn Knolle 6–8cm Ø. Nicht warten – wird holzig.",                                                b:"Beet 11"},
     {t:"ernte",     g:"Krautstiel",     i:"✂️",kat:"Ernte",         h:"Krautstiel: äussere Blätter",            d:"Äussere Blätter schneiden – fördert Neubildung. Max. 1/3 auf einmal.",                             b:"Beet 12"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 1. Juniwoche – Universaldünger", d:"Produkt: GROW by OBI BIO UF. Menge: 20ml/10L Wasser → 1L/Pflanze giessen.",                     b:"Beet 14"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 3. Juniwoche – Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 1–1.5L/Pflanze. Wöchentlicher Wechsel mit UF.",             b:"Beet 14"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: Düngung im Juni",               d:"1. Juniwoche – Universaldünger: GROW by OBI BIO UF, 20ml/10L Wasser → 1L/Pflanze giessen. 3. Juniwoche – Brennesseljauche: Gesal Extrakt 1:10, 1–1.5L/Pflanze. Wöchentlicher Wechsel.", b:"Beet 14"},
     {t:"duenger",   g:"Zucchetti",      i:"🌿",kat:"Düngung",       h:"Zucchetti/Kürbis/Mais: Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 2–3L/m² alle 3 Wochen. Sehr hoher Nährstoffbedarf!",        b:"Beete 1–3"},
     {t:"duenger",   g:"Blaukabis",      i:"🌿",kat:"Düngung",       h:"Blaukabis/Lauch: Brennesseljauche + Hühnermist", d:"Produkt: Gesal Extrakt 1:10 (1×/Juni) + Hühnermist 50g/m² (einmalig Juni).",            b:"Beet 11"},
     {t:"duenger",   g:"Auberginen",     i:"🌿",kat:"Düngung",       h:"Auberginen: alle 2 Wochen Universaldünger", d:"Produkt: GROW by OBI BIO UF flüssig. Menge: 1L/Pflanze alle 14 Tage.",                       b:"Beet 10"},
@@ -967,8 +1042,7 @@ const kal={
     {t:"ernte",     g:"Tomaten",        i:"🍅",kat:"Ernte",         h:"Tomaten: erste Ernte",                   d:"Vollreif: kräftige Farbe, weicher Druckpunkt. Laufend ernten fördert Neubildung.",                 b:"Beet 14"},
     {t:"ernte",     g:"Zucchetti",      i:"🥒",kat:"Ernte",         h:"Zucchetti: täglich kontrollieren",       d:"Klein ernten (15–20cm) – fördert Neubildung. Täglich schauen!",                                   b:"Beete 1–3"},
     {t:"ernte",     g:"Buschbohnen",    i:"🫘",kat:"Ernte",         h:"Buschbohnen: laufend ernten",            d:"Wenn Hülsen Bleistiftdicke. Regelmässig ernten = mehr Neubildung.",                               b:"Beet 10"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 1. Juliwoche Universaldünger",  d:"Produkt: GROW by OBI BIO UF. Menge: 20ml/10L→1L/Pflanze. Kaliumreich für Fruchtqualität.",       b:"Beet 14"},
-    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: 3. Juliwoche Brennesseljauche", d:"Produkt: Gesal Extrakt 1:10. Menge: 1.5L/Pflanze. Abwechselnd mit UF.",                          b:"Beet 14"},
+    {t:"duenger",   g:"Tomaten",        i:"🌿",kat:"Düngung",       h:"Tomaten: Düngung im Juli",               d:"1. Juliwoche – Universaldünger: GROW by OBI BIO UF, 20ml/10L→1L/Pflanze, kaliumreich für Fruchtqualität. 3. Juliwoche – Brennesseljauche: Gesal Extrakt 1:10, 1.5L/Pflanze. Abwechselnd.", b:"Beet 14"},
     {t:"duenger",   g:"Gurken",         i:"🌿",kat:"Düngung",       h:"Gurken: 1. Juli Universaldünger",        d:"Produkt: GROW by OBI BIO UF. Menge: 1L/Pflanze. Konstante Versorgung wichtig!",                  b:"Beete 15,16"},
     {t:"duenger",   g:"Pepperoni",      i:"🌿",kat:"Düngung",       h:"Pepperoni: 3. Juli Brennesseljauche",    d:"Produkt: Gesal Extrakt 1:10. Menge: 1L/Pflanze. Abwechselnd mit UF.",                            b:"Beete 15,16"},
     {t:"duenger",   g:"Zucchetti",      i:"🌿",kat:"Düngung",       h:"Zucchetti/Kürbis: Brennesseljauche Juli", d:"Produkt: Gesal Extrakt 1:10. Menge: 3L/m² alle 3 Wochen. Mais: ab Juli keine Düngung mehr.",    b:"Beete 1–3"},
@@ -1053,7 +1127,11 @@ function showTab(tab,el){
     initDatePicker('schutzDatum');
     initDatePicker('wasserDatum');
   }
-  if(tab==='auto') renderFBars();
+  if(tab==='auto'){
+    renderFBars();
+    renderRegenLog();renderRegenStats();initRegenDatum();
+    renderTempLog();renderTempStats();initTempDatum();initTempAlarmDisplay();
+  }
   if(tab==='tagebuch'){buildJKat();buildJBeet();renderJournal();}
   if(tab==='kalender'){buildKalGemuese();buildKal();}
 }
@@ -1560,6 +1638,137 @@ function initRegenDatum(){
   el.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
 }
 
+// ══ TEMPERATURSENSOR ═══════════════════════════════════════
+let tempLog = [];          // {d, val, notiz}
+let tempAlarmMin = 5;       // °C
+let tempAlarmMax = 35;      // °C
+let tempWertIdx = 24;       // Index in tempWertOpts (Default 20.0°C)
+const tempWertOpts = [];
+for(let t=-20; t<=50; t+=0.5){ tempWertOpts.push(t.toFixed(1)+' °C'); }
+// -20.0 ist Index 0, 0.5er-Schritte → 20.0°C ist Index (20-(-20))/0.5 = 80
+tempWertIdx = tempWertOpts.indexOf('20.0 °C');
+
+function chTempWert(d){
+  tempWertIdx = Math.max(0, Math.min(tempWertOpts.length-1, tempWertIdx+d));
+  const el = document.getElementById('tempWertVal');
+  if(el) el.textContent = tempWertOpts[tempWertIdx];
+}
+function chTempAlarmMin(d){
+  tempAlarmMin = Math.max(-30, Math.min(tempAlarmMax-1, tempAlarmMin+d));
+  const el = document.getElementById('tempAlarmMinVal');
+  if(el) el.textContent = tempAlarmMin+' °C';
+  renderTempStats();
+  saveAll();
+}
+function chTempAlarmMax(d){
+  tempAlarmMax = Math.max(tempAlarmMin+1, Math.min(60, tempAlarmMax+d));
+  const el = document.getElementById('tempAlarmMaxVal');
+  if(el) el.textContent = tempAlarmMax+' °C';
+  renderTempStats();
+  saveAll();
+}
+
+function tempEintr(){
+  const val = parseFloat(tempWertOpts[tempWertIdx]);
+  const datEl = document.getElementById('tempDatum');
+  const notEl = document.getElementById('tempNotiz');
+  const notiz = notEl ? notEl.value.trim() : '';
+  let d = datEl && datEl.value ? datEl.value : null;
+  if(d){ const p=d.split('-'); d=p[2]+'.'+p[1]+'.'+p[0]; }
+  else { d = nowStr(); }
+  tempLog.unshift({d, val, notiz});
+  if(notEl) notEl.value='';
+  // Auch als Journal-Eintrag
+  tbEntries.unshift({
+    id: Date.now(), datum: d, beet:'–', kat:'Temperatur', jkat:'temperatur',
+    txt:'Temperatur '+val.toFixed(1)+' °C',
+    due:'', emoji:'🌡', katC:'tz', notiz: notiz
+  });
+  renderTempLog();
+  renderTempStats();
+  renderJournal();
+  saveAll();
+  toast('✅ Temperatur eingetragen: '+val.toFixed(1)+' °C');
+}
+
+function delTemp(i){
+  tempLog.splice(i,1);
+  renderTempLog();
+  renderTempStats();
+  saveAll();
+  toast('🗑 Gelöscht');
+}
+
+function renderTempLog(){
+  const el = document.getElementById('tempLogEl');
+  if(!el) return;
+  if(!tempLog.length){ el.innerHTML='📋 Keine Einträge'; return; }
+  el.innerHTML = '📋 Temperaturhistorie:<br>' +
+    tempLog.slice(0,10).map((e,i)=>
+      '<span style="display:flex;justify-content:space-between;align-items:center;margin-top:3px">'
+      +'<span>'+e.d+' · '+e.val.toFixed(1)+' °C'+(e.notiz?' · '+e.notiz:'')+'</span>'
+      +'<button onclick="delTemp('+i+')" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:0 2px">×</button>'
+      +'</span>'
+    ).join('')
+    +(tempLog.length>10?'<div style="font-size:11px;color:var(--muted);margin-top:4px">+'+(tempLog.length-10)+' ältere Einträge im Journal</div>':'');
+}
+
+function renderTempStats(){
+  const today = nowStr();
+  let aktuell=null, max=null, min=null, letzt='–';
+
+  // Aktuell = neuester Eintrag (regenLog ist absteigend sortiert via unshift)
+  if(tempLog.length){
+    aktuell = tempLog[0].val;
+    letzt = tempLog[0].d+' ('+tempLog[0].val.toFixed(1)+' °C)';
+  }
+  // Min/Max heute
+  tempLog.forEach(e=>{
+    if(e.d===today){
+      if(max===null||e.val>max) max=e.val;
+      if(min===null||e.val<min) min=e.val;
+    }
+  });
+
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('tempAktuell', aktuell!==null ? aktuell.toFixed(1) : '–');
+  set('tempMax', max!==null ? max.toFixed(1) : '–');
+  set('tempMin', min!==null ? min.toFixed(1) : '–');
+  set('tempLetzt', letzt);
+
+  // Alarm-Banner
+  const banner = document.getElementById('tempAlarmBanner');
+  if(banner){
+    if(aktuell!==null && aktuell < tempAlarmMin){
+      banner.style.display='block';
+      banner.style.background='#dbeafe';
+      banner.style.color='#1e40af';
+      banner.innerHTML='🥶 Frostalarm: aktuelle Temperatur ('+aktuell.toFixed(1)+' °C) liegt unter der Min-Grenze ('+tempAlarmMin+' °C)!';
+    } else if(aktuell!==null && aktuell > tempAlarmMax){
+      banner.style.display='block';
+      banner.style.background='#fee2e2';
+      banner.style.color='#b91c1c';
+      banner.innerHTML='🥵 Hitzealarm: aktuelle Temperatur ('+aktuell.toFixed(1)+' °C) liegt über der Max-Grenze ('+tempAlarmMax+' °C)!';
+    } else {
+      banner.style.display='none';
+    }
+  }
+}
+
+function initTempDatum(){
+  const el = document.getElementById('tempDatum');
+  if(!el) return;
+  const n=new Date();
+  el.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+}
+
+function initTempAlarmDisplay(){
+  const elMin=document.getElementById('tempAlarmMinVal');
+  const elMax=document.getElementById('tempAlarmMaxVal');
+  if(elMin) elMin.textContent=tempAlarmMin+' °C';
+  if(elMax) elMax.textContent=tempAlarmMax+' °C';
+}
+
 function togAuto(){const on=document.getElementById('autoT').checked;document.getElementById('naxt').textContent=on?'Morgen 07:00':'Manuell';toast(on?'💧 Automatik ein':'🔴 Automatik aus');}
 function chFr(d){frI=Math.max(0,Math.min(frO.length-1,frI+d));document.getElementById('frV').textContent=frO[frI];}
 function chDa(d){daI=Math.max(0,Math.min(daO.length-1,daI+d));document.getElementById('daV').textContent=daO[daI];}
@@ -1801,26 +2010,33 @@ const HM_NAMES = {
 function getAllJournalEntries(){
   const all=[];
   // Pflanzungen/Saaten – Massnahme = Methode (Säen/Setzen/Jungpflanzen)
-  // Grunddüngung (e.due) erscheint NICHT als eigener Eintrag, sondern als 4. Notizzeile beim Pflanz-Eintrag
+  // Notiz zeigt NUR die echte, vom Benutzer eingegebene Notiz (e.notiz).
+  // Die Grunddüngungs-Info (e.due) wird NICHT als Notiz angezeigt.
   pflLog.forEach(e=>{
-    let notiz = e.notiz||'';
-    if(e.due){
-      const hmName = HM_NAMES[e.due]||e.due;
-      notiz = (notiz ? notiz+' | ' : '') + 'Grunddüngung: '+hmName;
-    }
+    const notiz = e.notiz||'';
     all.push({d:e.d, kat:'pflanzen', i:'🌱', kultur:e.k, titel:e.methode, detail:e.beet, extra:notiz, notiz:notiz});
   });
   // Düngergaben – Massnahme = NUR Hilfsmittel-Name (z.B. "Universaldünger", ohne "Düngung:"/"Grunddüngung")
   duengerLog.forEach(e=>{
     const hmName = HM_NAMES[e.typ]||e.typ;
-    all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.kultur||'', titel:hmName, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''});
+    const notiz = e.notiz||'';
+    all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.kultur||'', titel:hmName, detail:e.beet, extra:notiz, notiz:notiz});
   });
   // Giessen (manuell) – Massnahme = "Giessen"
-  wasserLog.forEach(e=> all.push({d:e.d, kat:'wasser', i:'💧', kultur:e.kultur||'', titel:'Giessen: '+e.menge, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  wasserLog.forEach(e=>{
+    const notiz = e.notiz||'';
+    all.push({d:e.d, kat:'wasser', i:'💧', kultur:e.kultur||'', titel:'Giessen: '+e.menge, detail:e.beet, extra:notiz, notiz:notiz});
+  });
   // Pflanzenschutz – Massnahme = Typ (Pilzbekämpfung etc.)
-  schutzLog.forEach(e=> all.push({d:e.d, kat:'schutz', i:'🐛', kultur:e.kultur||'', titel:e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
-  // Journal-Freieinträge (z.B. Regen, automatische Bewässerung)
-  tbEntries.forEach(e=> all.push({d:e.datum, kat:e.jkat||'journal', i:e.emoji, kultur:e.kultur||'', titel:e.txt, detail:e.beet, extra:e.due||'', notiz:e.due||''}));
+  schutzLog.forEach(e=>{
+    const notiz = e.notiz||'';
+    all.push({d:e.d, kat:'schutz', i:'🐛', kultur:e.kultur||'', titel:e.typ, detail:e.beet, extra:notiz, notiz:notiz});
+  });
+  // Journal-Freieinträge (z.B. Regen, automatische Bewässerung, Temperatur)
+  tbEntries.forEach(e=>{
+    const notiz = e.notiz||'';
+    all.push({d:e.datum, kat:e.jkat||'journal', i:e.emoji, kultur:e.kultur||'', titel:e.txt, detail:e.beet, extra:notiz, notiz:notiz});
+  });
   // Sortieren absteigend
   all.sort((a,b)=>{
     const pa=a.d.split('.').reverse().join('');
@@ -1852,9 +2068,9 @@ function renderJournal(){
     if(!byMonth[key]) byMonth[key]={label,items:[]};
     byMonth[key].items.push(e);
   });
-  const borderCol={pflanzen:'#22c55e',duenger:'#a16207',wasser:'#0ea5e9',schutz:'#ef4444',journal:'#ec4899',regen:'#0ea5e9'};
-  const katLabel={pflanzen:'🌱 Pflanzung',duenger:'🌿 Düngung',wasser:'💧 Giessen',schutz:'🐛 Schutz',journal:'📓 Journal',regen:'🌧 Regen'};
-  const katCls={pflanzen:'th',duenger:'tz',wasser:'th',schutz:'tw',journal:'th',regen:'th'};
+  const borderCol={pflanzen:'#22c55e',duenger:'#a16207',wasser:'#0ea5e9',schutz:'#ef4444',journal:'#ec4899',regen:'#0ea5e9',temperatur:'#f59e0b'};
+  const katLabel={pflanzen:'🌱 Pflanzung',duenger:'🌿 Düngung',wasser:'💧 Giessen',schutz:'🐛 Schutz',journal:'📓 Journal',regen:'🌧 Regen',temperatur:'🌡 Temperatur'};
+  const katCls={pflanzen:'th',duenger:'tz',wasser:'th',schutz:'tw',journal:'th',regen:'th',temperatur:'tz'};
   let html='';
   Object.keys(byMonth).sort((a,b)=>b.localeCompare(a)).forEach(mo=>{
     const grp=byMonth[mo];
@@ -1954,7 +2170,7 @@ function buildJournalCsv(entries){
   const BOM = '\uFEFF';
   const sep = ';';
   const header = ['Datum','Kultur','Kategorie','Massnahme','Notiz','Beet-Nr'].join(sep);
-  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen'};
+  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen',temperatur:'Temperatur'};
 
   const rows = entries.map(e=>{
     const datum  = e.d||'';
@@ -2081,6 +2297,9 @@ const STORE_KEYS={
   tbEntries: 'tf_tbEntries',
   kalRead:   'tf_kalRead',
   regen:     'tf_regenLog',
+  temp:      'tf_tempLog',
+  tempAlarmMin: 'tf_tempAlarmMin',
+  tempAlarmMax: 'tf_tempAlarmMax',
   journalDB: 'tf_journalDB',
   journalCsv:'tf_journalCsv',
 };
@@ -2105,6 +2324,9 @@ function saveAll(){
   storeSave(STORE_KEYS.tbEntries, tbEntries);
   storeSave(STORE_KEYS.kalRead,   kalRead);
   storeSave(STORE_KEYS.regen,     regenLog);
+  storeSave(STORE_KEYS.temp,      tempLog);
+  storeSave(STORE_KEYS.tempAlarmMin, tempAlarmMin);
+  storeSave(STORE_KEYS.tempAlarmMax, tempAlarmMax);
   syncJournalDB();
 }
 
@@ -2116,7 +2338,7 @@ function saveAll(){
 // aus localStorage gelesen wird (nicht aus dem Quellcode).
 function syncJournalDB(){
   const entries = getAllJournalEntries();
-  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen'};
+  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen',temperatur:'Temperatur'};
   const db = entries.map(e=>({
     datum:   e.d||'',
     kultur:  e.kultur||e.k||'',
@@ -2143,6 +2365,9 @@ function loadAll(){
   tbEntries  = storeLoad(STORE_KEYS.tbEntries, []);
   kalRead    = storeLoad(STORE_KEYS.kalRead,   {});
   regenLog   = storeLoad(STORE_KEYS.regen,    []);
+  tempLog    = storeLoad(STORE_KEYS.temp,     []);
+  tempAlarmMin = storeLoad(STORE_KEYS.tempAlarmMin, 5);
+  tempAlarmMax = storeLoad(STORE_KEYS.tempAlarmMax, 35);
 }
 
 // Automatisch speichern nach jeder Aktion – hook in alle Eintrag-Funktionen
