@@ -288,6 +288,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <!-- Vorschlagsbox – dynamisch befüllt -->
     <div id="pflVorschlag" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid var(--gl);border-radius:10px;padding:12px;font-size:13px;line-height:1.6">
     </div>
+    <div class="pr"><div class="prl">📅 Datum</div><input type="date" id="pflDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)"></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px;margin-top:8px">
       <div class="prl">📝 Notiz</div>
       <textarea class="ni" id="pflNotiz" rows="2" placeholder="z.B. Sorte, Herkunft, Besonderheiten…"></textarea>
@@ -321,12 +322,12 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       </select></div>
     <div class="pr"><div class="prl">🧪 Düngertyp</div>
       <select id="dTyp">
-        <option value="Universaldünger">Universaldünger (GROW by OBI BIO, NK 3.4/6.8)</option>
-        <option value="Hornspäne">Hornspäne (Hauert Biorga, NPK 12/0/0)</option>
-        <option value="Hühnermist">Hühnermist (Geistlich, NPKM 2.5/2.8/2.1/0.4)</option>
-        <option value="Kompost">Kompost fest (Bio Capito, NPK 0.5/0.3/0.5)</option>
-        <option value="Brennesseljauche">Brennesseljauche (Gesal Extrakt)</option>
-        <option value="Kuhmist">Kuhmist (kompostiert)</option>
+        <option value="Universaldünger">Universaldünger</option>
+        <option value="Hornspäne">Hornspäne</option>
+        <option value="Hühnermist">Hühnermist</option>
+        <option value="Kompost">Kompost fest</option>
+        <option value="Brennesseljauche">Brennesseljauche</option>
+        <option value="Kuhmist">Kuhmist</option>
       </select></div>
     <div class="pr"><div class="prl">📍 Beet</div>
       <select id="dBeet">
@@ -338,6 +339,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       </select></div>
     <div class="pr"><div class="prl">📅 Intervall</div>
       <div class="step"><button onclick="chDI(-1)">−</button><span id="dIV">alle 14 Tage</span><button onclick="chDI(1)">+</button></div></div>
+    <div class="pr"><div class="prl">📅 Datum</div><input type="date" id="dDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)"></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
       <div class="prl">📝 Notiz</div>
       <textarea class="ni" id="dNotiz" rows="2" placeholder="z.B. Menge, Beobachtung…"></textarea>
@@ -379,6 +381,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
         <option>Beet 13 (Schwarzwurzeln)</option><option>Beet 14 (Tomaten)</option>
         <option>Beete 15-16 (Pepperoni/Gurken)</option><option>Beet 17 (Salat)</option>
       </select></div>
+    <div class="pr"><div class="prl">📅 Datum</div><input type="date" id="schutzDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)"></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
       <div class="prl">📝 Was konkret? (Notiz)</div>
       <textarea class="ni" id="schutzNotiz" rows="3" placeholder="z.B. Kupferspritzmittel gegen Mehltau, Schneckenkörner ausgelegt…"></textarea>
@@ -387,9 +390,12 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <div class="dlog" id="schutzLogEl"></div>
   </div>
 
-  <!-- 4. BEWÄSSERUNGS-JOURNAL -->
-  <div class="pt">💦 Bewässerung</div>
+  <!-- 4. GIESSEN (manuell, Spritzkanne) -->
+  <div class="pt">🚿 Giessen</div>
   <div class="pc">
+    <p style="font-size:12px;color:var(--muted);margin:-4px 0 10px;line-height:1.5">
+      Nur für manuelles Giessen mit der Spritzkanne. Die automatische Bewässerung wird im Automatik-Tab verwaltet und dort ins Journal übertragen.
+    </p>
     <div class="pr"><div class="prl">🥬 Kultur</div>
       <select id="wasserKultur" onchange="autoSetWasserBeet()" style="max-width:180px">
         <option value="">– Kultur –</option>
@@ -420,13 +426,12 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
       </select></div>
     <div class="pr"><div class="prl">💧 Menge</div>
       <div class="step"><button onclick="chWL(-1)">−</button><span id="wasserVal">10 Liter</span><button onclick="chWL(1)">+</button></div></div>
-    <div class="pr"><div class="prl">⏱ Dauer</div>
-      <div class="step"><button onclick="chWM(-1)">−</button><span id="wasserMin">10 min</span><button onclick="chWM(1)">+</button></div></div>
+    <div class="pr"><div class="prl">📅 Datum</div><input type="date" id="wasserDatum" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)"></div>
     <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
       <div class="prl">📝 Notiz</div>
       <textarea class="ni" id="wasserNotiz" rows="2" placeholder="z.B. nach Trockenheit, vor Hitze…"></textarea>
     </div>
-    <button class="sbtn" onclick="wasserEintr()">✅ Bewässerung eintragen</button>
+    <button class="sbtn" onclick="wasserEintr()">✅ Giessen eintragen</button>
     <div class="dlog" id="wasserLogEl"></div>
   </div>
 
@@ -720,6 +725,8 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
   <!-- Anwendungsübersicht -->
   <div class="sec-label">📋 Anwendungsübersicht</div>
   <div class="pc">
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Kultur-Filter</div>
+    <div class="frow" id="hmKulturRow" style="margin-bottom:12px"></div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
       <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:400px">
         <tr style="background:var(--gd);color:#fff">
@@ -730,14 +737,7 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
           <th style="padding:8px 10px;text-align:center">Kompost</th>
           <th style="padding:8px 10px;text-align:center;border-radius:0 8px 0 0">Brennessel</th>
         </tr>
-        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Tomaten</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td></tr>
-        <tr><td style="padding:7px 10px;font-weight:600">Zucchetti/Kürbis</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td></tr>
-        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Mais</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td></tr>
-        <tr><td style="padding:7px 10px;font-weight:600">Kartoffeln</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
-        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Kabis/Lauch</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td></tr>
-        <tr><td style="padding:7px 10px;font-weight:600">Auberginen</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td></tr>
-        <tr style="background:#f9f9f9"><td style="padding:7px 10px;font-weight:600">Kopfsalat</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
-        <tr><td style="padding:7px 10px;font-weight:600">Knoblauch</td><td style="text-align:center;color:#d1d5db">–</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#22c55e">✅✅</td><td style="text-align:center;color:#22c55e">✅</td><td style="text-align:center;color:#d1d5db">–</td></tr>
+        <tbody id="hmTableBody"></tbody>
       </table>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px">✅✅ = ideal / ✅ = geeignet / – = nicht empfohlen</div>
@@ -1044,8 +1044,15 @@ function showTab(tab,el){
     fruchtfolge:'10-Jahres-Rotation',bibliothek:'Kultursteckbriefe',
     auto:'Bewässerungssteuerung',hilfsmittel:'Düngemittel & Pflanzenschutz'};
   document.getElementById('hsub').textContent=subs[tab]||'';
+  if(tab==='hilfsmittel'){buildHmKultur();renderHmTable();}
   const fabBtn=document.getElementById('fabBtn'); if(fabBtn) fabBtn.style.display=tab==='tagebuch'?'flex':'none';
-  if(tab==='pflege') renderFBars();
+  if(tab==='pflege'){
+    renderFBars();
+    initDatePicker('pflDatum');
+    initDatePicker('dDatum');
+    initDatePicker('schutzDatum');
+    initDatePicker('wasserDatum');
+  }
   if(tab==='auto') renderFBars();
   if(tab==='tagebuch'){buildJKat();buildJBeet();renderJournal();}
   if(tab==='kalender'){buildKalGemuese();buildKal();}
@@ -1189,7 +1196,7 @@ function buildKal(){
   function renderEntry(e,idx,isDone){
     return '<div class="ke '+e.t+(isDone?' done':'')+'" style="padding-right:40px;position:relative">'
       +'<div class="ki">'+e.i+'</div>'
-      +'<div class="kt"><h4>'+(e.g&&e.g!=='Alle'?'<span style="color:var(--gd)">'+e.g+':</span> ':'')+e.h+'</h4>'
+      +'<div class="kt"><h4>'+e.h+'</h4>'
       +'<p>'+(e.d||'')+'</p>'
       +'<span class="btag">'+(e.b||'')+'</span>'
       +'</div>'
@@ -1243,12 +1250,11 @@ function filtTb(f,btn){
 function addEntry(){toast('📝 Eintrag über Pflege-Tab erfassen');}
 
 // ══ PFLEGE (Stepper-State) ═══════════════════════════
-let frI=1,daI=2,dII=1,wLI=2,wMI=1;
+let frI=1,daI=2,dII=1,wLI=2;
 const frO=['1x/Woche','2x/Woche','3x/Woche','täglich'];
 const daO=['10 min','15 min','20 min','30 min','45 min','60 min'];
 const dIO=['alle 7 Tage','alle 14 Tage','alle 21 Tage','monatlich'];
 const wLO=['2 Liter','5 Liter','10 Liter','15 Liter','20 Liter','30 Liter','50 Liter'];
-const wMO=['5 min','10 min','15 min','20 min','30 min','45 min','60 min'];
 
 function updatePflVorschlag() {
   const k = document.getElementById('pflKultur').value;
@@ -1308,7 +1314,7 @@ function pflanzEintr() {
   const beet    = document.getElementById('pflBeet').value;
   const methode = document.getElementById('pflMethode').value;
   const notiz   = document.getElementById('pflNotiz')?.value.trim()||'';
-  const entry = {d:nowStr(), k, beet, methode, due: pflData[k]?pflData[k].due:'', notiz};
+  const entry = {d:dateFromPicker('pflDatum'), k, beet, methode, due: pflData[k]?pflData[k].due:'', notiz};
   pflLog.unshift(entry);
   newPflLog.unshift(entry);
   if(document.getElementById('pflNotiz')) document.getElementById('pflNotiz').value='';
@@ -1481,8 +1487,8 @@ function regenEintr(){
   if(notEl) notEl.value='';
   // Auch als Journal-Eintrag
   tbEntries.unshift({
-    id: Date.now(), datum: d, beet:'–', kat:'Regen',
-    txt:'Regen: '+mm+(notiz?' – '+notiz:''),
+    id: Date.now(), datum: d, beet:'–', kat:'Regen', jkat:'regen',
+    txt:'Regen '+mm,
     due:'', emoji:'🌧', katC:'tz'
   });
   renderRegenLog();
@@ -1559,7 +1565,6 @@ function chFr(d){frI=Math.max(0,Math.min(frO.length-1,frI+d));document.getElemen
 function chDa(d){daI=Math.max(0,Math.min(daO.length-1,daI+d));document.getElementById('daV').textContent=daO[daI];}
 function chDI(d){dII=Math.max(0,Math.min(dIO.length-1,dII+d));document.getElementById('dIV').textContent=dIO[dII];}
 function chWL(d){wLI=Math.max(0,Math.min(wLO.length-1,wLI+d));document.getElementById('wasserVal').textContent=wLO[wLI];}
-function chWM(d){wMI=Math.max(0,Math.min(wMO.length-1,wMI+d));document.getElementById('wasserMin').textContent=wMO[wMI];}
 
 function renderFBars(){
   renderTank();
@@ -1570,6 +1575,21 @@ function renderFBars(){
 }
 
 function nowStr(){const n=new Date();return String(n.getDate()).padStart(2,'0')+'.'+String(n.getMonth()+1).padStart(2,'0')+'.'+n.getFullYear();}
+function dateFromPicker(id){
+  const el=document.getElementById(id);
+  if(el && el.value){
+    const p=el.value.split('-');
+    return p[2]+'.'+p[1]+'.'+p[0];
+  }
+  return nowStr();
+}
+function initDatePicker(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const n=new Date();
+  el.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+}
+
 function logRow(txt,delFn,i){
   return '<div class="dlog-row"><span>'+txt+'</span><button class="del-btn" onclick="'+delFn+'('+i+')">×</button></div>';
 }
@@ -1580,7 +1600,7 @@ function duengeEintr(){
   const kultur=document.getElementById('dKultur')?.value||'';
   const beet=document.getElementById('dBeet').value;
   const notiz=document.getElementById('dNotiz')?.value.trim()||'';
-  duengerLog.unshift({d:nowStr(),beet,typ,kultur,notiz});
+  duengerLog.unshift({d:dateFromPicker('dDatum'),beet,typ,kultur,notiz});
   if(document.getElementById('dNotiz')) document.getElementById('dNotiz').value='';
   renderDLog();renderJournal();toast('✅ Düngergabe: '+(kultur?kultur+' · ':'')+typ);
 }
@@ -1601,7 +1621,7 @@ function schutzEintr(){
   const beet=document.getElementById('schutzBeet').value;
   const notiz=document.getElementById('schutzNotiz').value.trim();
   if(!notiz){toast('⚠️ Bitte Was-konkret ausfüllen');return;}
-  schutzLog.unshift({d:nowStr(),beet,typ,notiz,kultur});
+  schutzLog.unshift({d:dateFromPicker('schutzDatum'),beet,typ,notiz,kultur});
   document.getElementById('schutzNotiz').value='';
   renderSchutzLog();renderJournal();toast('✅ Massnahme: '+(kultur?kultur+' · ':'')+typ);
 }
@@ -1620,16 +1640,16 @@ function wasserEintr(){
   const kultur=document.getElementById('wasserKultur')?.value||'';
   const beet=document.getElementById('wasserBeet').value;
   const notiz=document.getElementById('wasserNotiz')?.value.trim()||'';
-  wasserLog.unshift({d:nowStr(),beet,menge:wLO[wLI],dauer:wMO[wMI],kultur,notiz});
+  wasserLog.unshift({d:dateFromPicker('wasserDatum'),beet,menge:wLO[wLI],kultur,notiz});
   if(document.getElementById('wasserNotiz')) document.getElementById('wasserNotiz').value='';
-  renderWasserLog();renderJournal();toast('✅ Bewässerung: '+(kultur?kultur+' · ':'')+wLO[wLI]);
+  renderWasserLog();renderJournal();toast('✅ Giessen: '+(kultur?kultur+' · ':'')+wLO[wLI]);
 }
 function delWasser(i){wasserLog.splice(i,1);renderWasserLog();renderJournal();toast('🗑 Gelöscht');}
 function renderWasserLog(){
   const el=document.getElementById('wasserLogEl');if(!el)return;
   const show=wasserLog.slice(0,3);
   el.innerHTML=show.length
-    ?'📋 Letzte Bewässerungen:'+show.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.menge+' / '+e.dauer,'delWasser',i)).join('')
+    ?'📋 Letztes Giessen:'+show.map((e,i)=>logRow(e.d+' · '+e.beet+' · '+e.menge,'delWasser',i)).join('')
       +(wasserLog.length>3?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Ältere Einträge im Journal</div>':'')
     :'📋 Keine Einträge';
 }
@@ -1768,21 +1788,39 @@ function matchBeet(beetStr, key){
   return false;
 }
 
+// Mapping: interner Düngertyp-Key -> Anzeigename (Hilfsmittel-Tab)
+const HM_NAMES = {
+  'Universaldünger':'Universaldünger',
+  'Hornspäne':'Hornspäne',
+  'Hühnermist':'Hühnermist',
+  'Kompost':'Kompost fest',
+  'Brennesseljauche':'Brennessel-Extrakt',
+  'Kuhmist':'Kuhmist',
+};
+
 function getAllJournalEntries(){
   const all=[];
-  // Pflanzungen/Saaten – mit Kultur + Notiz
+  // Pflanzungen/Saaten – Massnahme = Methode (Säen/Setzen/Jungpflanzen)
+  // Grunddüngung (e.due) erscheint NICHT als eigener Eintrag, sondern als 4. Notizzeile beim Pflanz-Eintrag
   pflLog.forEach(e=>{
-    all.push({d:e.d, kat:'pflanzen', i:'🌱', kultur:e.k, titel:e.methode, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''});
-    if(e.due) all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.k, titel:'Grunddüngung: '+e.due, detail:e.beet, extra:'', notiz:''});
+    let notiz = e.notiz||'';
+    if(e.due){
+      const hmName = HM_NAMES[e.due]||e.due;
+      notiz = (notiz ? notiz+' | ' : '') + 'Grunddüngung: '+hmName;
+    }
+    all.push({d:e.d, kat:'pflanzen', i:'🌱', kultur:e.k, titel:e.methode, detail:e.beet, extra:notiz, notiz:notiz});
   });
-  // Düngergaben – mit Kultur + Notiz
-  duengerLog.forEach(e=>all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.kultur||'', titel:'Düngung: '+e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
-  // Bewässerung – mit Kultur + Notiz
-  wasserLog.forEach(e=> all.push({d:e.d, kat:'wasser',  i:'💧', kultur:e.kultur||'', titel:'Bewässerung: '+e.menge+' / '+e.dauer, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
-  // Pflanzenschutz – mit Kultur + Notiz
-  schutzLog.forEach(e=> all.push({d:e.d, kat:'schutz',  i:'🐛', kultur:e.kultur||'', titel:e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
-  // Journal-Freieinträge
-  tbEntries.forEach(e=> all.push({d:e.datum, kat:'journal', i:e.emoji, kultur:e.kultur||'', titel:e.txt, detail:e.beet, extra:e.due||'', notiz:e.due||''}));
+  // Düngergaben – Massnahme = NUR Hilfsmittel-Name (z.B. "Universaldünger", ohne "Düngung:"/"Grunddüngung")
+  duengerLog.forEach(e=>{
+    const hmName = HM_NAMES[e.typ]||e.typ;
+    all.push({d:e.d, kat:'duenger', i:'🌿', kultur:e.kultur||'', titel:hmName, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''});
+  });
+  // Giessen (manuell) – Massnahme = "Giessen"
+  wasserLog.forEach(e=> all.push({d:e.d, kat:'wasser', i:'💧', kultur:e.kultur||'', titel:'Giessen: '+e.menge, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  // Pflanzenschutz – Massnahme = Typ (Pilzbekämpfung etc.)
+  schutzLog.forEach(e=> all.push({d:e.d, kat:'schutz', i:'🐛', kultur:e.kultur||'', titel:e.typ, detail:e.beet, extra:e.notiz||'', notiz:e.notiz||''}));
+  // Journal-Freieinträge (z.B. Regen, automatische Bewässerung)
+  tbEntries.forEach(e=> all.push({d:e.datum, kat:e.jkat||'journal', i:e.emoji, kultur:e.kultur||'', titel:e.txt, detail:e.beet, extra:e.due||'', notiz:e.due||''}));
   // Sortieren absteigend
   all.sort((a,b)=>{
     const pa=a.d.split('.').reverse().join('');
@@ -1814,9 +1852,9 @@ function renderJournal(){
     if(!byMonth[key]) byMonth[key]={label,items:[]};
     byMonth[key].items.push(e);
   });
-  const borderCol={pflanzen:'#22c55e',duenger:'#a16207',wasser:'#0ea5e9',schutz:'#ef4444',journal:'#ec4899'};
-  const katLabel={pflanzen:'🌱 Pflanzung',duenger:'🌿 Düngung',wasser:'💧 Bewässerung',schutz:'🐛 Schutz',journal:'📓 Journal'};
-  const katCls={pflanzen:'th',duenger:'tz',wasser:'th',schutz:'tw',journal:'th'};
+  const borderCol={pflanzen:'#22c55e',duenger:'#a16207',wasser:'#0ea5e9',schutz:'#ef4444',journal:'#ec4899',regen:'#0ea5e9'};
+  const katLabel={pflanzen:'🌱 Pflanzung',duenger:'🌿 Düngung',wasser:'💧 Giessen',schutz:'🐛 Schutz',journal:'📓 Journal',regen:'🌧 Regen'};
+  const katCls={pflanzen:'th',duenger:'tz',wasser:'th',schutz:'tw',journal:'th',regen:'th'};
   let html='';
   Object.keys(byMonth).sort((a,b)=>b.localeCompare(a)).forEach(mo=>{
     const grp=byMonth[mo];
@@ -1910,28 +1948,33 @@ function autoSetWasserBeet(){ autoSetSelectBeet('wasserBeet','wasserKultur'); }
 // ════════════════════════════════════════════════════════════
 // JOURNAL: Export als CSV (Excel-kompatibel)
 // ════════════════════════════════════════════════════════════
-function exportJournal(){
-  const entries = getAllJournalEntries();
-  if(!entries.length){ toast('📓 Keine Einträge zum Exportieren'); return; }
-
-  // BOM für Excel-UTF8-Kompatibilität
+// Erzeugt CSV-Inhalt (BOM + Header + Zeilen) aus den Journal-Einträgen
+// Spaltenreihenfolge: Datum;Kultur;Kategorie;Massnahme;Notiz;Beet-Nr
+function buildJournalCsv(entries){
   const BOM = '\uFEFF';
   const sep = ';';
-  const header = ['Datum','Kultur','Massnahme','Notiz','Beet-Nr','Kategorie'].join(sep);
+  const header = ['Datum','Kultur','Kategorie','Massnahme','Notiz','Beet-Nr'].join(sep);
+  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen'};
 
   const rows = entries.map(e=>{
     const datum  = e.d||'';
     const kultur = e.kultur||e.k||'';
+    const kat    = katLabel[e.kat]||e.kat||'';
     const massn  = e.titel||'';
     const notiz  = (e.extra||e.notiz||'').replace(/🌿 /g,'');
     const beet   = (e.detail||'').replace(/Beet[e]?\s*/i,'').replace(/ \(.*\)/,'').trim();
-    const kat    = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Bewässerung',schutz:'Pflanzenschutz',journal:'Journal'}[e.kat]||e.kat||'';
-    // Felder mit Semikolon oder Newlines in Quotes
     const q = s => (s.includes(sep)||s.includes('\n')||s.includes('"')) ? '"'+s.replace(/"/g,'""')+'"' : s;
-    return [datum,kultur,massn,notiz,beet,kat].map(q).join(sep);
+    return [datum,kultur,kat,massn,notiz,beet].map(q).join(sep);
   });
 
-  const csv = BOM + header + '\n' + rows.join('\n');
+  return BOM + header + '\n' + rows.join('\n');
+}
+
+function exportJournal(){
+  const entries = getAllJournalEntries();
+  if(!entries.length){ toast('📓 Keine Einträge zum Exportieren'); return; }
+
+  const csv = buildJournalCsv(entries);
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
 
@@ -1956,6 +1999,74 @@ function exportJournal(){
 // (ersetzt bestehende renderJournal-Funktion)
 // ════════════════════════════════════════════════════════════
 
+
+// ════════════════════════════════════════════════════════════
+// HILFSMITTEL: Anwendungsübersicht mit Kultur-Filter
+// ════════════════════════════════════════════════════════════
+const hmAnwendung = [
+  // [Kultur, UF, Hornspäne, Hühnermist, Kompost, Brennessel]
+  ["Tomaten",          2,0,1,1,2],
+  ["Zucchetti",        1,0,2,2,2],
+  ["Kürbis",           1,0,2,2,2],
+  ["Mais",             1,0,2,2,1],
+  ["Kartoffeln",       2,0,1,1,0],
+  ["Zwiebeln",         1,0,1,1,0],
+  ["Karotten",         1,0,0,1,0],
+  ["Kohlrabi",         1,2,2,1,1],
+  ["Blaukabis",        1,2,2,1,1],
+  ["Lauch",            1,2,2,1,1],
+  ["Fenchel",          1,1,1,1,0],
+  ["Krautstiel",       1,1,1,1,0],
+  ["Schwarzwurzeln",   1,0,0,1,0],
+  ["Auberginen",       2,1,1,0,1],
+  ["Buschbohnen",      0,0,0,1,1],
+  ["Pepperoni",        2,0,1,0,1],
+  ["Paprika",          2,0,1,0,1],
+  ["Gurken",           2,0,1,0,1],
+  ["Kopfsalat",        1,0,0,1,0],
+  ["Feldsalat",        0,0,0,1,0],
+  ["Knoblauch",        0,1,2,1,0],
+  ["Winterlauch",      1,1,1,1,0],
+  ["Spinat",           0,0,0,1,0],
+  ["Endivien",         0,0,0,1,0],
+  ["Zuckerhut",        0,0,0,1,0],
+];
+let hmKultur='alle';
+function hmIcon(v){
+  if(v===2) return '<span style="color:#22c55e">✅✅</span>';
+  if(v===1) return '<span style="color:#22c55e">✅</span>';
+  return '<span style="color:#d1d5db">–</span>';
+}
+function buildHmKultur(){
+  const el=document.getElementById('hmKulturRow');
+  if(!el) return;
+  const list=['alle',...hmAnwendung.map(r=>r[0])];
+  el.innerHTML=list.map(k=>
+    '<button class="fbtn'+(hmKultur===k?' active':'')+'" onclick="setHmKultur(this)" data-k="'+k+'" style="flex-shrink:0">'+(k==='alle'?'Alle':k)+'</button>'
+  ).join('');
+}
+function setHmKultur(btn){
+  hmKultur=btn.dataset.k;
+  document.querySelectorAll('#hmKulturRow .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHmTable();
+}
+function renderHmTable(){
+  const el=document.getElementById('hmTableBody');
+  if(!el) return;
+  const rows=hmKultur==='alle'?hmAnwendung:hmAnwendung.filter(r=>r[0]===hmKultur);
+  el.innerHTML=rows.map((r,i)=>
+    '<tr style="background:'+(i%2===0?'#f9f9f9':'#fff')+'">'
+    +'<td style="padding:7px 10px;font-weight:600">'+r[0]+'</td>'
+    +'<td style="text-align:center">'+hmIcon(r[1])+'</td>'
+    +'<td style="text-align:center">'+hmIcon(r[2])+'</td>'
+    +'<td style="text-align:center">'+hmIcon(r[3])+'</td>'
+    +'<td style="text-align:center">'+hmIcon(r[4])+'</td>'
+    +'<td style="text-align:center">'+hmIcon(r[5])+'</td>'
+    +'</tr>'
+  ).join('');
+}
+
 // ══ TOAST ════════════════════════════════════════════════
 function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
@@ -1970,6 +2081,8 @@ const STORE_KEYS={
   tbEntries: 'tf_tbEntries',
   kalRead:   'tf_kalRead',
   regen:     'tf_regenLog',
+  journalDB: 'tf_journalDB',
+  journalCsv:'tf_journalCsv',
 };
 
 function storeSave(key, data){
@@ -1992,6 +2105,29 @@ function saveAll(){
   storeSave(STORE_KEYS.tbEntries, tbEntries);
   storeSave(STORE_KEYS.kalRead,   kalRead);
   storeSave(STORE_KEYS.regen,     regenLog);
+  syncJournalDB();
+}
+
+// ══ JOURNAL-DATENBANK (persistente Tabelle) ═══════════════
+// journalDB ist die "Datenbank"-Tabelle: wird bei jeder Änderung
+// aus allen Quell-Logs neu zusammengestellt und in localStorage
+// abgelegt (Spalten: Datum, Kultur, Kategorie, Massnahme, Notiz, Beet-Nr).
+// Damit bleibt das Journal auch bei Code-Updates erhalten, da es
+// aus localStorage gelesen wird (nicht aus dem Quellcode).
+function syncJournalDB(){
+  const entries = getAllJournalEntries();
+  const katLabel = {pflanzen:'Pflanzung',duenger:'Düngung',wasser:'Giessen',schutz:'Pflanzenschutz',journal:'Journal',regen:'Regen'};
+  const db = entries.map(e=>({
+    datum:   e.d||'',
+    kultur:  e.kultur||e.k||'',
+    kategorie: katLabel[e.kat]||e.kat||'',
+    massnahme: e.titel||'',
+    notiz:   (e.extra||e.notiz||'').replace(/🌿 /g,''),
+    beet:    (e.detail||'').replace(/Beet[e]?\s*/i,'').replace(/ \(.*\)/,'').trim(),
+  }));
+  storeSave(STORE_KEYS.journalDB, db);
+  // CSV-Repräsentation ebenfalls cachen (gleicher Inhalt wie Export)
+  storeSave(STORE_KEYS.journalCsv, buildJournalCsv(entries));
 }
 
 function loadAll(){
@@ -2037,6 +2173,7 @@ buildYrSel();
 buildKalGemuese();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
 renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
 buildJKat();buildJBeet();renderJournal();
+syncJournalDB();
 </script>
 </body>
 </html>
