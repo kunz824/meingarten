@@ -54,6 +54,89 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .fV{background:var(--gp);border-color:var(--gl)}.fVI{background:var(--tp);border-color:#2dd4bf}
 .fVII{background:var(--pp);border-color:#c084fc}.fVIII{background:#fee2e2;border-color:#f87171}
 .fIX{background:#f0fdf4;border-color:#86efac}.fX{background:#ecfdf5;border-color:#22c55e}
+
+/* ══════════════════════════════════════════════════════════
+   IPAD / GRÖSSERE BILDSCHIRME (≥768px)
+   Seitliche Navigation statt Tab-Leiste unten, breiteres Layout
+   ══════════════════════════════════════════════════════════ */
+@media (min-width:768px){
+  body{
+    max-width:none;
+    flex-direction:row;
+    height:100dvh;
+    align-items:stretch;
+  }
+  .status-bar{display:none}
+  .app-header{
+    width:240px;
+    flex-shrink:0;
+    padding:max(24px,env(safe-area-inset-top,24px)) 20px 16px;
+    border-radius:0;
+    order:1;
+  }
+  .app-header h1{font-size:24px;margin-bottom:2px}
+  .app-header p{font-size:12px}
+  .content{
+    flex:1;
+    height:100dvh;
+    padding-bottom:24px;
+    max-width:900px;
+    margin:0 auto;
+    order:3;
+  }
+  .screen{padding:28px 32px}
+  /* Tab-Leiste wird zur vertikalen Sidebar-Navigation, direkt unter dem Header */
+  .tab-bar{
+    position:static;
+    left:auto;transform:none;
+    width:240px;max-width:240px;
+    height:auto;
+    flex-shrink:0;
+    flex-direction:column;
+    align-items:stretch;
+    background:var(--gd);
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+    border-top:none;
+    padding:8px 10px 20px;
+    gap:2px;
+    overflow-y:auto;
+    order:2;
+  }
+  .tab{
+    flex-direction:row;
+    justify-content:flex-start;
+    gap:12px;
+    padding:10px 12px;
+    border-radius:10px;
+    color:#fff;
+  }
+  .tab-icon{font-size:18px}
+  .tab-label{font-size:13px;color:rgba(255,255,255,.65)}
+  .tab.active{background:rgba(255,255,255,.12)}
+  .tab.active .tab-label{color:#fff}
+  /* Modal als zentriertes Dialogfenster statt Bottom-Sheet */
+  .mo{align-items:center}
+  .ms{
+    max-width:520px;
+    border-radius:20px;
+    max-height:85dvh;
+    padding:24px 24px calc(24px + var(--sb));
+    animation:none;
+  }
+  /* Karten/Formulare als responsives Grid für bessere Raumnutzung */
+  .pc{max-width:640px}
+  .beet-grid{max-width:640px}
+}
+
+/* ══════════════════════════════════════════════════════════
+   GROSSES IPAD / DESKTOP (≥1100px) – noch breitere Sidebar
+   ══════════════════════════════════════════════════════════ */
+@media (min-width:1100px){
+  .app-header{width:280px}
+  .tab-bar{width:280px;max-width:280px}
+  .content{max-width:1000px}
+  .screen{padding:32px 48px}
+}
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
 .mo.open{display:flex}
@@ -820,6 +903,40 @@ select{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-
     <div style="font-size:11px;color:var(--muted);margin-top:8px">✅✅ = ideal / ✅ = geeignet / – = nicht empfohlen</div>
   </div>
 
+  <!-- SYNCHRONISATION -->
+  <div class="sec-label">📱 Geräte-Synchronisation</div>
+  <div class="pc">
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">
+      Damit Eingaben auf iPhone und iPad gegenseitig erscheinen, werden alle Daten in einem privaten Online-Speicher (JSONBin.io) abgelegt. Einmal pro Gerät einrichten – danach läuft die Synchronisation automatisch im Hintergrund.
+    </p>
+    <div class="pr">
+      <div class="prl">🔄 Sync aktiv</div>
+      <label class="ts"><input type="checkbox" id="syncEnabled" onchange="toggleSync()"><span class="tsl"></span></label>
+    </div>
+    <div id="syncConfigBox" style="display:none">
+      <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <div class="prl">🔑 Bin-ID</div>
+        <input type="text" id="syncBinId" placeholder="z.B. 65abc123def456..." style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)">
+      </div>
+      <div class="pr" style="flex-direction:column;align-items:flex-start;gap:6px;margin-top:8px">
+        <div class="prl">🔑 Master-Key (X-Master-Key)</div>
+        <input type="password" id="syncApiKey" placeholder="$2a$10$..." style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--card)">
+      </div>
+      <button class="sbtn" style="margin-top:10px" onclick="saveSyncConfig()">💾 Zugangsdaten speichern</button>
+      <button class="sbtn" style="margin-top:8px;background:var(--gm)" onclick="manualSync()">🔄 Jetzt synchronisieren</button>
+      <div id="syncStatus" style="margin-top:10px;font-size:12px;color:var(--muted)">–</div>
+    </div>
+    <div style="margin-top:10px;background:#f0f9ff;border-radius:8px;padding:10px 12px;font-size:12px;color:#0369a1;line-height:1.6">
+      ℹ️ <b>Einmalige Einrichtung (auf einem Gerät):</b><br>
+      1. Kostenloses Konto auf jsonbin.io erstellen<br>
+      2. Im Dashboard: "X-Master-Key" kopieren (unter API Keys)<br>
+      3. Einen neuen Bin erstellen (z.B. mit Inhalt <code>{}</code>) und die Bin-ID kopieren<br>
+      4. Bin-ID und Master-Key hier eingeben, Sync aktivieren<br>
+      5. Auf dem zweiten Gerät (iPhone/iPad): die <b>gleiche</b> Bin-ID und den <b>gleichen</b> Master-Key eintragen<br><br>
+      Danach werden alle Journal-, Kalender- und Pflegeeinträge automatisch zwischen den Geräten abgeglichen.
+    </div>
+  </div>
+
 </div>
 
 <!-- TAB FRUCHTFOLGE -->
@@ -1118,7 +1235,8 @@ function showTab(tab,el){
     fruchtfolge:'10-Jahres-Rotation',bibliothek:'Kultursteckbriefe',
     auto:'Bewässerungssteuerung',hilfsmittel:'Düngemittel & Pflanzenschutz'};
   document.getElementById('hsub').textContent=subs[tab]||'';
-  if(tab==='hilfsmittel'){buildHmKultur();renderHmTable();}
+  if(tab==='hilfsmittel'){buildHmKultur();renderHmTable();initSyncUI();}
+  maybeAutoPull();
   const fabBtn=document.getElementById('fabBtn'); if(fabBtn) fabBtn.style.display=tab==='tagebuch'?'flex':'none';
   if(tab==='pflege'){
     renderFBars();
@@ -2328,6 +2446,7 @@ function saveAll(){
   storeSave(STORE_KEYS.tempAlarmMin, tempAlarmMin);
   storeSave(STORE_KEYS.tempAlarmMax, tempAlarmMax);
   syncJournalDB();
+  scheduleAutoPush();
 }
 
 // ══ JOURNAL-DATENBANK (persistente Tabelle) ═══════════════
@@ -2391,14 +2510,225 @@ delSchutz    = function(i){ _origDelSchutz(i);  saveAll(); };
 delWasser    = function(i){ _origDelWasser(i);  saveAll(); };
 togKalRead   = function(i){ _origTogKalRead(i); saveAll(); };
 
-// ══ INIT ═════════════════════════════════════════════════
+// ══ CLOUD-SYNC (JSONBin.io) ═══════════════════════════════
+// Synchronisiert alle Datenarrays zwischen Geräten (iPhone/iPad)
+// über einen gemeinsamen JSONBin-Bin. Konfiguration (Bin-ID +
+// Master-Key) wird pro Gerät lokal in localStorage abgelegt.
+const SYNC_CFG_KEY = 'tf_syncConfig';
+let syncCfg = { enabled:false, binId:'', apiKey:'' };
+let syncInProgress = false;
+let syncDebounceTimer = null;
+let syncLastPulledAt = 0;
+
+function loadSyncConfig(){
+  syncCfg = storeLoad(SYNC_CFG_KEY, { enabled:false, binId:'', apiKey:'' });
+}
+function persistSyncConfig(){
+  storeSave(SYNC_CFG_KEY, syncCfg);
+}
+
+function initSyncUI(){
+  const enEl = document.getElementById('syncEnabled');
+  const idEl = document.getElementById('syncBinId');
+  const keyEl = document.getElementById('syncApiKey');
+  const boxEl = document.getElementById('syncConfigBox');
+  if(!enEl) return;
+  enEl.checked = !!syncCfg.enabled;
+  if(idEl) idEl.value = syncCfg.binId || '';
+  if(keyEl) keyEl.value = syncCfg.apiKey || '';
+  if(boxEl) boxEl.style.display = syncCfg.enabled ? 'block' : 'none';
+  setSyncStatus(syncCfg.enabled ? 'Bereit.' : 'Sync ist deaktiviert.');
+}
+
+function toggleSync(){
+  const enEl = document.getElementById('syncEnabled');
+  const boxEl = document.getElementById('syncConfigBox');
+  syncCfg.enabled = enEl.checked;
+  if(boxEl) boxEl.style.display = syncCfg.enabled ? 'block' : 'none';
+  persistSyncConfig();
+  if(syncCfg.enabled && syncCfg.binId && syncCfg.apiKey){
+    manualSync();
+  }
+}
+
+function saveSyncConfig(){
+  const idEl = document.getElementById('syncBinId');
+  const keyEl = document.getElementById('syncApiKey');
+  syncCfg.binId  = idEl ? idEl.value.trim() : '';
+  syncCfg.apiKey = keyEl ? keyEl.value.trim() : '';
+  persistSyncConfig();
+  if(!syncCfg.binId || !syncCfg.apiKey){
+    setSyncStatus('⚠️ Bitte Bin-ID und Master-Key eingeben.');
+    return;
+  }
+  toast('💾 Zugangsdaten gespeichert');
+  if(syncCfg.enabled) manualSync();
+}
+
+function setSyncStatus(msg){
+  const el = document.getElementById('syncStatus');
+  if(el) el.textContent = msg;
+}
+
+// Sammelt den gesamten App-Zustand für die Synchronisation
+function collectSyncData(){
+  return {
+    _updatedAt: Date.now(),
+    pflLog, newPflLog, duengerLog, schutzLog, wasserLog,
+    tbEntries, kalRead, regenLog, tempLog,
+    tempAlarmMin, tempAlarmMax,
+  };
+}
+
+// Übernimmt empfangene Daten in den lokalen Zustand
+function applySyncData(data){
+  if(!data || typeof data !== 'object') return;
+  if(Array.isArray(data.pflLog))    pflLog    = data.pflLog;
+  if(Array.isArray(data.newPflLog)) newPflLog = data.newPflLog;
+  if(Array.isArray(data.duengerLog))duengerLog= data.duengerLog;
+  if(Array.isArray(data.schutzLog)) schutzLog = data.schutzLog;
+  if(Array.isArray(data.wasserLog)) wasserLog = data.wasserLog;
+  if(Array.isArray(data.tbEntries)) tbEntries = data.tbEntries;
+  if(data.kalRead && typeof data.kalRead==='object') kalRead = data.kalRead;
+  if(Array.isArray(data.regenLog))  regenLog  = data.regenLog;
+  if(Array.isArray(data.tempLog))   tempLog   = data.tempLog;
+  if(typeof data.tempAlarmMin==='number') tempAlarmMin = data.tempAlarmMin;
+  if(typeof data.tempAlarmMax==='number') tempAlarmMax = data.tempAlarmMax;
+  // Lokal persistieren (ohne erneuten Push auszulösen)
+  storeSave(STORE_KEYS.pflLog,    pflLog);
+  storeSave(STORE_KEYS.newPflLog, newPflLog);
+  storeSave(STORE_KEYS.duenger,   duengerLog);
+  storeSave(STORE_KEYS.schutz,    schutzLog);
+  storeSave(STORE_KEYS.wasser,    wasserLog);
+  storeSave(STORE_KEYS.tbEntries, tbEntries);
+  storeSave(STORE_KEYS.kalRead,   kalRead);
+  storeSave(STORE_KEYS.regen,     regenLog);
+  storeSave(STORE_KEYS.temp,      tempLog);
+  storeSave(STORE_KEYS.tempAlarmMin, tempAlarmMin);
+  storeSave(STORE_KEYS.tempAlarmMax, tempAlarmMax);
+  syncJournalDB();
+}
+
+// Aktualisiert alle sichtbaren Listen nach einem Sync-Pull
+function refreshAllViews(){
+  renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
+  renderRegenLog();renderRegenStats();
+  renderTempLog();renderTempStats();initTempAlarmDisplay();
+  buildKal();
+  renderJournal();
+  buildJKat();buildJBeet();
+}
+
+// Lädt Daten vom Bin (GET /latest)
+async function pullSync(){
+  if(!syncCfg.binId || !syncCfg.apiKey) return null;
+  const res = await fetch('https://api.jsonbin.io/v3/b/'+syncCfg.binId+'/latest', {
+    headers: { 'X-Master-Key': syncCfg.apiKey, 'X-Bin-Meta':'false' }
+  });
+  if(!res.ok) throw new Error('Pull fehlgeschlagen: '+res.status);
+  return await res.json();
+}
+
+// Schreibt Daten in den Bin (PUT)
+async function pushSync(data){
+  if(!syncCfg.binId || !syncCfg.apiKey) return;
+  const res = await fetch('https://api.jsonbin.io/v3/b/'+syncCfg.binId, {
+    method:'PUT',
+    headers: { 'Content-Type':'application/json', 'X-Master-Key': syncCfg.apiKey },
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error('Push fehlgeschlagen: '+res.status);
+}
+
+// Manueller Sync-Button: pull, ggf. mergen (last-write-wins), dann push
+async function manualSync(){
+  if(!syncCfg.binId || !syncCfg.apiKey){
+    setSyncStatus('⚠️ Bitte zuerst Bin-ID und Master-Key speichern.');
+    return;
+  }
+  if(syncInProgress) return;
+  syncInProgress = true;
+  setSyncStatus('🔄 Synchronisiere…');
+  try{
+    const remote = await pullSync();
+    const remoteTs = remote && remote._updatedAt ? remote._updatedAt : 0;
+    const localTs  = storeLoad('tf_localUpdatedAt', 0);
+    if(remoteTs > localTs){
+      applySyncData(remote);
+      refreshAllViews();
+      storeSave('tf_localUpdatedAt', remoteTs);
+      setSyncStatus('✅ Aktualisiert von anderem Gerät · '+new Date(remoteTs).toLocaleString('de-CH'));
+    } else {
+      const local = collectSyncData();
+      await pushSync(local);
+      storeSave('tf_localUpdatedAt', local._updatedAt);
+      setSyncStatus('✅ Hochgeladen · '+new Date(local._updatedAt).toLocaleString('de-CH'));
+    }
+    syncLastPulledAt = Date.now();
+  } catch(e){
+    console.warn('Sync error', e);
+    setSyncStatus('❌ Fehler: '+e.message);
+  } finally {
+    syncInProgress = false;
+  }
+}
+
+// Automatischer Push nach lokalen Änderungen (debounced, 3s)
+function scheduleAutoPush(){
+  if(!syncCfg.enabled || !syncCfg.binId || !syncCfg.apiKey) return;
+  if(syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(async ()=>{
+    try{
+      const local = collectSyncData();
+      await pushSync(local);
+      storeSave('tf_localUpdatedAt', local._updatedAt);
+      setSyncStatus('✅ Synchronisiert · '+new Date(local._updatedAt).toLocaleTimeString('de-CH'));
+    } catch(e){
+      console.warn('Auto-push error', e);
+      setSyncStatus('❌ Sync-Fehler: '+e.message);
+    }
+  }, 3000);
+}
+
+// Automatischer Pull beim Öffnen der App / Tab-Wechsel (max. alle 30s)
+async function maybeAutoPull(){
+  if(!syncCfg.enabled || !syncCfg.binId || !syncCfg.apiKey) return;
+  if(syncInProgress) return;
+  if(Date.now() - syncLastPulledAt < 30000) return;
+  syncInProgress = true;
+  try{
+    const remote = await pullSync();
+    const remoteTs = remote && remote._updatedAt ? remote._updatedAt : 0;
+    const localTs  = storeLoad('tf_localUpdatedAt', 0);
+    if(remoteTs > localTs){
+      applySyncData(remote);
+      refreshAllViews();
+      storeSave('tf_localUpdatedAt', remoteTs);
+      setSyncStatus('✅ Aktualisiert von anderem Gerät · '+new Date(remoteTs).toLocaleString('de-CH'));
+    }
+    syncLastPulledAt = Date.now();
+  } catch(e){
+    console.warn('Auto-pull error', e);
+  } finally {
+    syncInProgress = false;
+  }
+}
+
+
 loadAll();
 loadTank();
+loadSyncConfig();
 buildYrSel();
 buildKalGemuese();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
 renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
 buildJKat();buildJBeet();renderJournal();
 syncJournalDB();
+// Initialer Pull (verzögert, damit die UI zuerst rendert)
+setTimeout(()=>{
+  if(syncCfg.enabled){
+    maybeAutoPull().then(refreshAllViews);
+  }
+}, 800);
 </script>
 </body>
 </html>
