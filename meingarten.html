@@ -1000,37 +1000,54 @@ let kalRead={};
 // Tagebuch (Freieinträge)
 let tbEntries=[];
 
-// Düngergaben, Bewässerung, Pflanzenschutz
-let duengerLog=[];
+// Pflanzenschutz, Giessen (manuell) – keine Stammdaten, starten leer
 let schutzLog=[];
 let wasserLog=[];
 
-// Pflanzungen
+// Pflanzungen (manuell erfasst über Pflege-Tab)
 let newPflLog=[];
 
-// Historische Pflanzeinträge aus Journal.xlsx
-let pflLog=[
-  {d:"19.03.2026",k:"Zwiebeln",     beet:"Beet 8/9",   methode:"Setzen / Stecken",    due:"Universaldünger",notiz:""},
-  {d:"19.03.2026",k:"Karotten",     beet:"Beet 8/9",   methode:"Säen",                due:"Universaldünger",notiz:""},
-  {d:"19.03.2026",k:"Kartoffeln",   beet:"Beet 4-7",   methode:"Setzen / Stecken",    due:"Universaldünger",notiz:""},
-  {d:"23.04.2026",k:"Kopfsalat",    beet:"Beet 17",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"23.04.2026",k:"Schwarzwurzeln",beet:"Beet 13",   methode:"Säen",                due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Mais",         beet:"Beet 1/2/3", methode:"Säen",                due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Zucchetti",    beet:"Beet 1/2/3", methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Kürbis",       beet:"Beet 1/2/3", methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Kopfsalat",    beet:"Beet 17",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Auberginen",   beet:"Beet 10",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Buschbohnen",  beet:"Beet 10",    methode:"Säen",                due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Kohlrabi",     beet:"Beet 11",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Blaukabis",    beet:"Beet 11",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Lauch",        beet:"Beet 11",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Fenchel",      beet:"Beet 12",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Krautstiel",   beet:"Beet 12",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Tomaten",      beet:"Beet 14",    methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Pepperoni",    beet:"Beet 15/16", methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Paprika",      beet:"Beet 15/16", methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-  {d:"22.05.2026",k:"Gurken",       beet:"Beet 15/16", methode:"Jungpflanzen setzen", due:"Universaldünger",notiz:""},
-];
+// ── PFLEGEHINWEISE (Pflanzungen, Düngergaben, ...) ───────────
+// Diese Arrays starten bewusst LEER. Alle Pflegehinweise (Pflanzungen,
+// Düngergaben, Pflanzenschutz, Giessen, Regen, Temperatur, Journal)
+// werden ausschliesslich aus der externen Datenbank (JSONBin) gelesen
+// und dorthin zurückgeschrieben (siehe Cloud-Sync, Abschnitt unten).
+// Die historischen Einträge (20× Pflanzen + 20× Universaldünger,
+// Stand Journal.xlsx) liegen als Startbefüllung im JSONBin-Bin.
+let pflLog=[];
+let duengerLog=[];
+
+// ══ MIGRATION: Grunddüngung aus Pflanz-Einträgen separieren ══
+// Ältere Datensätze (lokal oder aus der Cloud) können noch ein
+// 'due'-Feld an Pflanz-Einträgen haben (Grunddüngungs-Hinweis aus
+// der Bibliothek). Diese Funktion wandelt das in einen eigenständigen
+// Düngergaben-Eintrag um (Kultur, Datum, Beet) und entfernt 'due'
+// vom Pflanz-Eintrag. Idempotent – läuft nach jedem Laden/Sync-Pull.
+function migratePflLogDue(){
+  let migrated = false;
+  pflLog.forEach(e=>{
+    if(e.due){
+      const txt = e.due;
+      const typ = /Universaldünger/i.test(txt) ? 'Universaldünger'
+                : /Hornspäne/i.test(txt)        ? 'Hornspäne'
+                : /Hühnermist/i.test(txt)       ? 'Hühnermist'
+                : /Kompost/i.test(txt)          ? 'Kompost'
+                : /Brennessel/i.test(txt)       ? 'Brennesseljauche'
+                : /Kuhmist/i.test(txt)          ? 'Kuhmist'
+                : 'Universaldünger';
+      const rest = txt
+        .replace(/Universaldünger|Hornspäne|Hühnermist|Kompost(?:\s*fest)?|Brennessel(?:jauche|-Extrakt)?|Kuhmist|GROW by OBI BIO|Gesal|Hauert|Geistlich|Bio Capito/gi,'')
+        .replace(/[()+\/]/g,' ').replace(/\s{2,}/g,' ').trim();
+      duengerLog.push({
+        d: e.d, beet: e.beet, typ, kultur: e.k,
+        notiz: rest.length>2 ? rest : ''
+      });
+      delete e.due;
+      migrated = true;
+    }
+  });
+  return migrated;
+}
 
 // Bibliothek
 const bib=[
@@ -1331,7 +1348,7 @@ function openBeet(b){
   if(tbR.length||wR.length||sR.length||dR.length||pflR.length){
     pflHTML='<div style="margin-top:14px;border-top:2px solid var(--border);padding-top:12px">'
       +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">🌿 Pflege & Journal</div>';
-    pflR.forEach(e=>{ pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between"><span>🌱 '+e.d+' – '+e.k+' ('+e.methode+')</span>'+(e.due?'<span style="color:#92400e;font-size:11px">'+e.due+'</span>':'')+'</div>'; });
+    pflR.forEach(e=>{ pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0">🌱 '+e.d+' – '+e.k+' ('+e.methode+')'+(e.notiz?' <span style="color:#888;font-size:11px">– '+e.notiz+'</span>':'')+'</div>'; });
     tbR.forEach(e=>{ pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0">'+e.emoji+' '+e.datum+' – '+e.txt+'</div>'; });
     dR.forEach(e=>{ pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:var(--gd)">🌿 '+e.d+' – '+e.typ+(e.notiz?' ('+e.notiz+')':'')+'</div>'; });
     wR.forEach(e=>{ pflHTML+='<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:#0369a1">💧 '+e.d+' – '+e.menge+' / '+e.dauer+'</div>'; });
@@ -1524,7 +1541,7 @@ function pflanzEintr() {
   const beet    = document.getElementById('pflBeet').value;
   const methode = document.getElementById('pflMethode').value;
   const notiz   = document.getElementById('pflNotiz')?.value.trim()||'';
-  const entry = {d:dateFromPicker('pflDatum'), k, beet, methode, due: pflData[k]?pflData[k].due:'', notiz};
+  const entry = {d:dateFromPicker('pflDatum'), k, beet, methode, notiz};
   pflLog.unshift(entry);
   newPflLog.unshift(entry);
   if(document.getElementById('pflNotiz')) document.getElementById('pflNotiz').value='';
@@ -2486,13 +2503,14 @@ function syncJournalDB(){
 }
 
 function loadAll(){
-  // pflLog: localStorage überschreibt historische Daten wenn vorhanden
+  // pflLog/duengerLog: aus localStorage laden (vom letzten Sync-Pull oder
+  // lokalen Eingaben); bleiben sonst leer, bis der erste Cloud-Pull greift
   const savedPfl = storeLoad(STORE_KEYS.pflLog, null);
   if(savedPfl !== null) pflLog = savedPfl;
-  // else: pflLog behält historische Einträge aus dem Code
+  const savedDue = storeLoad(STORE_KEYS.duenger, null);
+  if(savedDue !== null) duengerLog = savedDue;
 
   newPflLog  = storeLoad(STORE_KEYS.newPflLog, []);
-  duengerLog = storeLoad(STORE_KEYS.duenger,   []);
   schutzLog  = storeLoad(STORE_KEYS.schutz,    []);
   wasserLog  = storeLoad(STORE_KEYS.wasser,    []);
   tbEntries  = storeLoad(STORE_KEYS.tbEntries, []);
@@ -2526,16 +2544,28 @@ togKalRead   = function(i){ _origTogKalRead(i); saveAll(); };
 
 // ══ CLOUD-SYNC (JSONBin.io) ═══════════════════════════════
 // Synchronisiert alle Datenarrays zwischen Geräten (iPhone/iPad)
-// über einen gemeinsamen JSONBin-Bin. Konfiguration (Bin-ID +
-// Master-Key) wird pro Gerät lokal in localStorage abgelegt.
+// über einen gemeinsamen JSONBin-Bin. Diese Standardwerte sind Teil
+// der App-Installation – jede Neuinstallation verbindet sich damit
+// automatisch mit der gemeinsamen Datenbank und lädt alle Einträge.
+// Ein Gerät kann unten in den Einstellungen abweichende Werte
+// hinterlegen (überschreibt diese Defaults lokal).
+const SYNC_DEFAULT_BIN_ID  = '6a2ceb4ada38895dfeb8e8bb';
+const SYNC_DEFAULT_API_KEY = '$2a$10$GbaP2/8zDCGeG3HvKoSUNutMwT7yBwpC4Z0iyCNdnuMFcOskKko.u';
+
 const SYNC_CFG_KEY = 'tf_syncConfig';
-let syncCfg = { enabled:false, binId:'', apiKey:'' };
+let syncCfg = { enabled:true, binId:SYNC_DEFAULT_BIN_ID, apiKey:SYNC_DEFAULT_API_KEY };
 let syncInProgress = false;
 let syncDebounceTimer = null;
 let syncLastPulledAt = 0;
 
 function loadSyncConfig(){
-  syncCfg = storeLoad(SYNC_CFG_KEY, { enabled:false, binId:'', apiKey:'' });
+  const stored = storeLoad(SYNC_CFG_KEY, null);
+  if(stored && stored.binId && stored.apiKey){
+    syncCfg = stored;
+  } else {
+    // Kein lokales Override vorhanden → eingebaute Standardwerte verwenden
+    syncCfg = { enabled:true, binId:SYNC_DEFAULT_BIN_ID, apiKey:SYNC_DEFAULT_API_KEY };
+  }
 }
 function persistSyncConfig(){
   storeSave(SYNC_CFG_KEY, syncCfg);
@@ -2620,6 +2650,11 @@ function applySyncData(data){
   storeSave(STORE_KEYS.temp,      tempLog);
   storeSave(STORE_KEYS.tempAlarmMin, tempAlarmMin);
   storeSave(STORE_KEYS.tempAlarmMax, tempAlarmMax);
+  // Migration (Grunddüngung→Düngergaben) auf frisch empfangene Daten anwenden
+  if(migratePflLogDue()){
+    storeSave(STORE_KEYS.pflLog,  pflLog);
+    storeSave(STORE_KEYS.duenger, duengerLog);
+  }
   syncJournalDB();
 }
 
@@ -2732,6 +2767,12 @@ async function maybeAutoPull(){
 loadAll();
 loadTank();
 loadSyncConfig();
+// Migration (Grunddüngung→Düngergaben) auf lokal geladene Daten anwenden
+if(migratePflLogDue()){
+  storeSave(STORE_KEYS.pflLog,  pflLog);
+  storeSave(STORE_KEYS.duenger, duengerLog);
+  scheduleAutoPush();
+}
 buildYrSel();
 buildKalGemuese();buildGrid();buildKal();buildFF();buildLibFilt();renderLib();
 renderDLog();renderSchutzLog();renderWasserLog();renderPflLog();
